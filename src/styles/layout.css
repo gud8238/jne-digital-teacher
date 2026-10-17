@@ -1,0 +1,364 @@
+.site-header {
+  height: 76px;
+  background: #ffffffed;
+  border-radius: 0 0 30px 30px;
+  position: relative;
+  z-index: 10;
+}
+.header-inner {
+  height: 100%;
+  max-width: 1320px;
+  width: calc(100% - 80px);
+  margin: auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.brand {
+  flex-shrink: 0;
+  width: 330px;
+}
+.brand img {
+  width: 100%;
+  height: auto;
+}
+.brand-caption {
+  border-left: 1px solid #6b79b8;
+  padding-left: 20px;
+  font-size: 16px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.site-header nav {
+  display: flex;
+  gap: 25px;
+  margin-left: auto;
+  align-items: center;
+  white-space: nowrap;
+  font-weight: 800;
+}
+.site-header nav a {
+  padding: 25px 0;
+  position: relative;
+}
+.site-header nav a.active {
+  color: var(--blue);
+}
+.site-header nav a.active::after {
+  content: "";
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--blue);
+  border-radius: 5px;
+}
+.login-link {
+  border: 1.5px solid #0752ff;
+  border-radius: 30px;
+  padding: 9px 24px;
+  color: var(--blue);
+  font-weight: 800;
+  white-space: nowrap;
+}
+.header-account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.header-account > span {
+  font-size: 13px;
+  max-width: 110px;
+  overflow-wrap: anywhere;
+}
+.header-error {
+  padding: 12px 25px;
+  background: #fff2f3;
+  color: #ad3550;
+  position: relative;
+  z-index: 20;
+  text-align: center;
+}
+.header-error button {
+  margin-left: 10px;
+}
+.bottom-nav {
+  display: none;
+}
+.page-banner {
+  position: relative;
+  min-height: 290px;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at 25% 100%, white, transparent 45%),
+    linear-gradient(120deg, #dff1ff, #edf8ff 55%, #d0eaff);
+  overflow: hidden;
+  padding: 35px 300px 50px;
+}
+.page-banner h1 {
+  font-size: 58px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+.page-banner strong {
+  display: block;
+  font-size: 24px;
+  color: var(--blue);
+  margin: 12px 0 5px;
+}
+.page-banner p {
+  font-size: 17px;
+}
+.banner-art {
+  position: absolute;
+  top: 10px;
+  width: 300px;
+  height: 325px;
+  background-image: url("/assets/reference-badges.png");
+  background-size: 1229px 819px;
+  pointer-events: none;
+  mask-image: linear-gradient(#000 85%, transparent);
+}
+.banner-art.left {
+  left: 0;
+  background-position: -12px -105px;
+}
+.banner-art.right {
+  right: 0;
+  background-position: -925px -105px;
+}
+.page-banner::after {
+  content: "";
+  position: absolute;
+  height: 35px;
+  left: -3%;
+  right: -3%;
+  bottom: -18px;
+  background: #f5faff;
+  border-radius: 50%;
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.section-title h2 {
+  font-size: 32px;
+  font-weight: 900;
+}
+.section-title p {
+  color: var(--muted);
+  font-size: 14px;
+}
+.pill {
+  display: inline-flex;
+  border-radius: 20px;
+  background: #e5f2ff;
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 800;
+  padding: 5px 14px;
+}
+.pill.green {
+  background: #d7f8e6;
+  color: #008b45;
+}
+.pill.purple {
+  background: #eee4ff;
+  color: #7134cd;
+}
+.pill.gold {
+  background: #fff0c8;
+  color: #b56d00;
+}
+.pill.gray {
+  background: #e9edf3;
+  color: #708098;
+}
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filters button {
+  padding: 10px 23px;
+  border-radius: 16px;
+  background: #eaf1fc;
+  color: #3f5480;
+  font-size: 14px;
+  min-height: 40px;
+}
+.filters button.active {
+  background: var(--blue);
+  color: white;
+  font-weight: 800;
+}
+.official-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #34548b;
+  padding: 15px;
+  margin: 20px auto 30px;
+  max-width: 850px;
+  text-align: center;
+}
+.loading-page {
+  padding-top: 60px;
+}
+@media (max-width: 1200px) {
+  .brand {
+    width: 275px;
+  }
+  .brand-caption {
+    font-size: 13px;
+    padding-left: 14px;
+  }
+  .header-inner {
+    gap: 14px;
+    width: calc(100% - 40px);
+  }
+  .site-header nav {
+    gap: 18px;
+    font-size: 14px;
+  }
+  .login-link {
+    padding: 9px 16px;
+  }
+  .header-account > span {
+    display: none;
+  }
+  .page-banner {
+    padding-inline: 245px;
+  }
+  .banner-art {
+    opacity: 0.65;
+  }
+}
+@media (max-width: 950px) {
+  .brand-caption {
+    display: none;
+  }
+  .page-banner {
+    padding-inline: 160px;
+  }
+  .banner-art {
+    width: 200px;
+    opacity: 0.45;
+  }
+  .banner-art.right {
+    background-position: -1010px -105px;
+  }
+  .page-banner h1 {
+    font-size: 45px;
+  }
+  .page-banner strong {
+    font-size: 20px;
+  }
+  .page-banner p {
+    font-size: 15px;
+  }
+}
+@media (max-width: 700px) {
+  .site-header {
+    height: 67px;
+    border-radius: 0;
+    background: #f5faff;
+  }
+  .header-inner {
+    width: calc(100% - 36px);
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .brand {
+    width: 215px;
+    max-width: 67%;
+  }
+  .site-header nav {
+    display: none;
+  }
+  .site-header .login-link {
+    font-size: 12px;
+    padding: 7px 12px;
+  }
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    background: #ffffffed;
+    backdrop-filter: blur(12px);
+    border-top: 1px solid #e6edf7;
+    z-index: 50;
+    padding: 9px 5px max(10px, env(safe-area-inset-bottom));
+  }
+  .bottom-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: #8b9cba;
+    min-width: 65px;
+    padding: 1px 4px;
+  }
+  .bottom-nav a.active {
+    color: var(--blue);
+    font-weight: 800;
+  }
+  .bottom-nav svg {
+    width: 23px;
+    height: 23px;
+  }
+  .page-banner {
+    min-height: 135px;
+    padding: 20px 20px 30px;
+    background: linear-gradient(120deg, #e4f3ff, #f5faff);
+    text-align: left;
+  }
+  .page-banner h1 {
+    font-size: 30px;
+  }
+  .page-banner strong {
+    font-size: 16px;
+    margin: 8px 0 4px;
+  }
+  .page-banner p {
+    font-size: 13px;
+    max-width: 85%;
+  }
+  .banner-art {
+    display: none;
+  }
+  .section-title {
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+  .section-title h2 {
+    font-size: 23px;
+  }
+  .section-title p {
+    font-size: 12px;
+  }
+  .filters {
+    gap: 5px;
+  }
+  .filters button {
+    font-size: 12px;
+    padding: 9px 15px;
+    border-radius: 20px;
+  }
+  .official-note {
+    align-items: flex-start;
+    font-size: 11px;
+    padding-inline: 16px;
+  }
+}

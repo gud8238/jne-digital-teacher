@@ -1,0 +1,17 @@
+:root {
+  font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  color: #09134f;
+  background: #f5faff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --navy: #09134f;
+  --blue: #0064ff;
+  --sky: #e6f3ff;
+  --muted: #63749e;
+  --line: #dce9fa;
+  --mint: #d9f8e7;
+  --purple: #8552ee;
+  --shadow: 0 6px 26px #71a9e61b;
+  --radius: 22px;
+}
