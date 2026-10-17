@@ -92,7 +92,10 @@ export default function MyBadgesPage() {
                 key={key}
                 className={filter === key ? "active" : ""}
                 aria-pressed={filter === key}
-                onClick={() => setFilter(key)}
+                onClick={() => {
+                  setFilter(key);
+                  setSelected(null);
+                }}
               >
                 {label}
               </button>

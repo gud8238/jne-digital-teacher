@@ -720,9 +720,6 @@
   .detail-content .pill {
     font-size: 10px;
   }
-  .badge-detail.default-detail {
-    display: none;
-  }
   .roadmap {
     padding: 15px 12px;
     border-radius: 23px;
@@ -1098,10 +1095,46 @@
 }
 .guide-roadmap {
   position: relative;
-  max-width: 900px;
   margin-top: -210px;
   margin-bottom: 22px;
   z-index: 2;
+}
+@media (min-width: 1200px) {
+  .guide-roadmap .roadmap {
+    padding: 28px;
+  }
+  .guide-roadmap .roadmap-title h2 {
+    font-size: 28px;
+  }
+  .guide-roadmap .roadmap-title > span {
+    font-size: 14px;
+  }
+  .guide-roadmap .roadmap-stages {
+    padding: 24px 20px;
+    gap: 14px;
+  }
+  .guide-roadmap .roadmap-stage.beginner,
+  .guide-roadmap .roadmap-stage.master {
+    flex-basis: 180px;
+  }
+  .guide-roadmap .roadmap-stage > .badge-image {
+    width: 140px;
+    height: 140px;
+  }
+  .guide-roadmap .roadmap-stage > b {
+    font-size: 18px;
+  }
+  .guide-roadmap .expert-icons {
+    gap: 10px;
+  }
+  .guide-roadmap .expert-icons .badge-image {
+    width: 90px;
+    height: 90px;
+  }
+  .guide-roadmap .expert-icons span,
+  .guide-roadmap .expert-icons small {
+    font-size: 11px;
+  }
 }
 .guide-columns {
   display: grid;
@@ -1689,7 +1722,6 @@
   .guide-roadmap {
     margin-top: -15px;
     margin-bottom: 24px;
-    width: calc(100% - 28px);
   }
   .guide-roadmap .roadmap-title {
     display: none;

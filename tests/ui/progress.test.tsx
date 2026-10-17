@@ -26,6 +26,25 @@ function view(page: "my" | "guide", data: any = me) {
     </MemoryRouter>,
   );
 }
+it("배지함은 클릭한 배지만 설명을 열고 필터를 누르면 설명을 닫는다", async () => {
+  view("my");
+  await screen.findByLabelText("전체 획득 배지");
+  for (const filter of ["전체 (7)", "획득 (3)", "미획득 (4)", "마스터 (1)"]) {
+    await userEvent.click(
+      screen.getByRole("button", { name: filter }),
+    );
+    expect(screen.queryByRole("region", { name: /상세 설명$/ })).toBeNull();
+    const badge = within(
+      screen.getByRole("group", { name: "배지 목록" }),
+    ).getAllByRole("button")[0];
+    await userEvent.click(badge);
+    expect(screen.getByRole("region", { name: /상세 설명$/ })).toBeVisible();
+    await userEvent.click(
+      screen.getByRole("button", { name: filter }),
+    );
+    expect(screen.queryByRole("region", { name: /상세 설명$/ })).toBeNull();
+  }
+});
 it("개인 현황을 계산하고 획득·미획득 필터를 적용한다", async () => {
   view("my");
   expect(await screen.findByLabelText("전체 획득 배지")).toHaveTextContent(

@@ -13,9 +13,12 @@ export default function BadgesPage() {
     [filter, setFilter] = useState(0),
     [selected, setSelected] = useState<BadgeId | null>(null),
     trigger = useRef<HTMLElement | null>(null);
-  const active =
-    data.definitions.find((b) => b.id === selected) || data.definitions[0];
   const visible = data.definitions.filter((b) => !filter || b.stage === filter);
+  const defaultId =
+    filter === 2 ? "edtech" : filter === 3 ? "master" : "beginner";
+  const active =
+    visible.find((b) => b.id === selected) ||
+    visible.find((b) => b.id === defaultId);
   function close() {
     setSelected(null);
     trigger.current?.focus();

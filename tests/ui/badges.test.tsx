@@ -18,6 +18,35 @@ const view = () =>
       </BadgeProvider>
     </MemoryRouter>,
   );
+it("단계 필터를 바꾸면 해당 단계의 기본 설명으로 바꾼다", async () => {
+  vi.stubGlobal("fetch", async () => Response.json({ ok: true, data: defs }));
+  view();
+  await screen.findByRole("region", { name: "AI디지털 입문자 상세 설명" });
+  await userEvent.click(
+    screen.getByRole("button", { name: "전문가" }),
+  );
+  expect(
+    screen.getByRole("region", { name: "에듀테크 전문가 상세 설명" }),
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("region", { name: "AI디지털 입문자 상세 설명" }),
+  ).toBeNull();
+  await userEvent.click(
+    screen.getByRole("button", { name: "현장코칭 전문가 상세 보기" }),
+  );
+  await userEvent.click(
+    screen.getByRole("button", { name: "마스터" }),
+  );
+  expect(
+    screen.getByRole("region", { name: "역량 마스터 상세 설명" }),
+  ).toBeVisible();
+  await userEvent.click(
+    screen.getByRole("button", { name: "전체" }),
+  );
+  expect(
+    screen.getByRole("region", { name: "AI디지털 입문자 상세 설명" }),
+  ).toBeVisible();
+});
 it("7종 필터와 선택한 배지의 실제 설명·기준을 표시한다", async () => {
   vi.stubGlobal("fetch", async () => Response.json({ ok: true, data: defs }));
   view();
