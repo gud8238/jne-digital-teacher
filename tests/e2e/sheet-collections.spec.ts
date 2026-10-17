@@ -75,5 +75,8 @@ test("가로형 시트의 현재 계정으로 배지함·인증안내·소개·�
       `${accounts[1].earnedCount} / 7`,
     );
     await page.getByRole("button", { name: "로그아웃", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "이메일로 로그인" }),
+    ).toBeVisible();
   }
 });

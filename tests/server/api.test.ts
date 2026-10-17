@@ -37,6 +37,18 @@ const login = JSON.stringify({
   name: "테스트교원01",
 });
 describe("브라우저 API 경계", () => {
+  it.each([undefined, "jne_badge_session=" + "b".repeat(64)])(
+    "실패한 이전 세션 조회가 새 로그인 쿠키를 지우지 않는다: %s",
+    async (cookie) => {
+      const { deps } = setup();
+      const response = await handleApi(
+        req("me", "GET", undefined, cookie),
+        deps,
+      );
+      expect(response.status).toBe(401);
+      expect(response.headers.get("set-cookie")).toBeNull();
+    },
+  );
   it("쿠키가 이미 없어도 로그아웃을 성공시키고 쿠키를 삭제한다", async () => {
     const { deps } = setup();
     const response = await handleApi(req("logout", "POST"), deps);

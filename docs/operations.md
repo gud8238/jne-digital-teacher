@@ -41,3 +41,5 @@ GAS 프로젝트: https://script.google.com/home/projects/1U10P6gNLioQQaC8jnlzTI
 의존성은 `npm ci`, 단위·컴포넌트 검증은 `npm test`, 타입 검사는 `npm run typecheck`, 린트는 `npm run lint`, 제품 빌드는 `npm run build`입니다. API를 포함한 로컬 실행은 `netlify dev`입니다. 실제 연결 없이 `npm run dev`만 실행하면 로그인 API를 사용할 수 없습니다.
 
 프런트엔드의 기본 실행에는 가짜 사용자나 정적 API 대체가 없습니다. 연결 실패 시 화면에서 다시 시도하거나 환경설정을 확인합니다.
+
+인증 실패한 이전 GET 응답은 새 로그인 쿠키를 지우지 않습니다. 개인 화면 상태는 인증 실패 즉시 지우며, 쿠키 삭제는 명시적 로그아웃에서 처리합니다.

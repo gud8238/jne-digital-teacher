@@ -114,7 +114,6 @@ export async function handleApi(
     } else {
       const token = readSession(request);
       if (!token && action !== "logout") {
-        headers.set("set-cookie", sessionCookie(request, "", true));
         throw new ServiceError(401, "UNAUTHORIZED", "로그인이 필요합니다.");
       }
       if (action === "logout") {
@@ -148,7 +147,8 @@ export async function handleApi(
             "SERVICE_UNAVAILABLE",
             "데이터 연결을 확인해 주세요.",
           );
-    if (error.status === 401)
+    // A stale GET can finish after a new login; it must not erase the new cookie.
+    if (error.status === 401 && request.method === "POST")
       headers.set("set-cookie", sessionCookie(request, "", true));
     return send(
       { ok: false, error: { code: error.code, message: error.message } },
