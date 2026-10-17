@@ -2,6 +2,10 @@
 
 전남광주통합특별시교육청 교원의 AI·디지털역량 성장 현황을 확인하는 반응형 프로토타입입니다.
 
+[웹앱 열기](https://jne-digital-teacher.netlify.app) · [GitHub](https://github.com/gud8238/jne-digital-teacher) · [검증 기록](docs/verification.md)
+
+`이메일로 로그인` → 나이스번호 `0000000001`, 이름 `테스트교원01`로 배지 3개인 합성 계정을 확인할 수 있습니다.
+
 ## 실행
 
 Node 24에서 `npm ci`를 실행하고 `.env.example`을 `.env`로 복사해 서버 설정을 입력합니다. `netlify dev`로 FE와 중계 API를 함께 실행합니다. DB는 Google Sheets, API는 GAS doGet이며 설정 절차는 [운영 안내](docs/operations.md)를 참고하세요.

@@ -22,6 +22,16 @@ GAS 소스 변경은 `npx clasp push`, 버전 및 웹앱 갱신은 `npx clasp de
 
 ## 실행과 확인
 
+운영 웹앱: https://jne-digital-teacher.netlify.app
+
+GitHub: https://github.com/gud8238/jne-digital-teacher (`main`)
+
+Netlify 프로젝트 ID: `84d03263-0534-441b-aee4-50d065e6d371`. 이 폴더에서 `netlify deploy --build --prod`로 배포합니다. 현재는 CLI 배포 방식이며, GitHub push만으로 자동 배포하지 않습니다.
+
+GAS 프로젝트: https://script.google.com/home/projects/1U10P6gNLioQQaC8jnlzTIHxCoi8T4g8kp_SNdU5xdaobQy3cTmwISOov/edit
+
+기존 웹앱 배포 ID: `AKfycbyMhrukubhvwY67SFv4WgHfdaM_ak13p8xUA3w46PYh6CiytIyID8SsLGdS9IsaioVK`. 최초 완료 시점의 GAS 버전은 5입니다.
+
 의존성은 `npm ci`, 단위·컴포넌트 검증은 `npm test`, 타입 검사는 `npm run typecheck`, 린트는 `npm run lint`, 제품 빌드는 `npm run build`입니다. API를 포함한 로컬 실행은 `netlify dev`입니다. 실제 연결 없이 `npm run dev`만 실행하면 로그인 API를 사용할 수 없습니다.
 
 프런트엔드의 기본 실행에는 가짜 사용자나 정적 API 대체가 없습니다. 연결 실패 시 화면에서 다시 시도하거나 환경설정을 확인합니다.
