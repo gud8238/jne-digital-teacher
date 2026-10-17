@@ -34,8 +34,6 @@ export default function CollectionCard({
               <Icon name="calendar" size={15} />
               {collection.earnedAt || "취득일 미등록"}
             </>
-          ) : badge.id === "master" ? (
-            "전문가 배지 3종 이상 획득"
           ) : (
             <span>나의 다음 도전</span>
           )}

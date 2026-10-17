@@ -940,6 +940,12 @@
   gap: 10px;
   margin-top: 10px;
 }
+@media (min-width: 701px) {
+  .collection-groups {
+    display: grid;
+    grid-auto-rows: 1fr;
+  }
+}
 .stage-label {
   display: flex;
   align-items: center;
@@ -1061,25 +1067,6 @@
 .collection-card.stage-1,
 .collection-card.stage-3 {
   grid-column: 1/-1;
-  flex-direction: row;
-  text-align: left;
-  gap: 15px;
-  padding: 12px 20px;
-  min-height: 140px;
-}
-.collection-card.stage-1 .collection-image,
-.collection-card.stage-3 .collection-image {
-  width: 110px;
-  flex-shrink: 0;
-}
-.collection-card.stage-1 h3,
-.collection-card.stage-3 h3 {
-  font-size: 20px;
-}
-.collection-card.stage-1 p,
-.collection-card.stage-3 p {
-  justify-content: flex-start;
-  font-size: 12px;
 }
 .mobile-growth-prompt {
   display: none;
@@ -1653,14 +1640,6 @@
   }
   .collection-card p svg {
     display: none;
-  }
-  .collection-card.locked p {
-    display: none;
-  }
-  .collection-card.locked.stage-3 p {
-    display: block;
-    font-size: 8px;
-    line-height: 1.6;
   }
   .mobile-growth-prompt {
     display: flex;
