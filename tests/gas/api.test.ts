@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { runtime } from "./runtime";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
+import { seed, headers } from "../../scripts/seed-data.mjs";
 const login = {
   action: "login",
   neisNumber: "0000000001",
@@ -68,50 +69,76 @@ describe("GAS 인증과 데이터 경계", () => {
     expect(r.call(login).error.code).toBe("DATA_ERROR");
   });
 });
-it("실제 doGet 어댑터가 읽기 전용 Sheets API로 JSON을 반환한다", () => {
-  const fixture = runtime();
-  let outbound = "";
-  const context = vm.createContext({
-    PropertiesService: {
-      getScriptProperties: () => ({
-        getProperty: (key: string) =>
-          key === "SPREADSHEET_ID" ? "sheet-id" : "test-secret",
-      }),
-    },
-    CacheService: { getScriptCache: () => ({}) },
-    ScriptApp: { getOAuthToken: () => "oauth-token" },
-    UrlFetchApp: {
-      fetch: (url: string, options: any) => {
-        outbound = url;
-        expect(options.headers.Authorization).toBe("Bearer oauth-token");
-        const rows = fixture.tables["배지소개"];
-        return {
-          getResponseCode: () => 200,
-          getContentText: () =>
-            JSON.stringify({
-              values: [
-                Object.keys(rows[0]),
-                ...rows.map((r) => Object.values(r)),
-              ],
-            }),
-        };
+it.each(["badges", "me"])(
+  "실제 doGet 어댑터가 읽기 전용 Sheets API로 %s JSON을 반환한다",
+  (action) => {
+    const fixture = runtime();
+    fixture.tables["배지별 수집현황"] = seed.collections.map((row) =>
+      Object.fromEntries(headers.collections.map((h, i) => [h, row[i]])),
+    );
+    let outbound = "";
+    const context = vm.createContext({
+      PropertiesService: {
+        getScriptProperties: () => ({
+          getProperty: (key: string) =>
+            key === "SPREADSHEET_ID" ? "sheet-id" : "test-secret",
+        }),
       },
-    },
-    ContentService: {
-      MimeType: { JSON: "application/json" },
-      createTextOutput: (value: string) => ({
-        setMimeType: (mime: string) => ({ value, mime }),
-      }),
-    },
-  });
-  vm.runInContext(readFileSync("gas/Code.js", "utf8"), context);
-  const result = context.doGet({
-    parameter: { key: "test-secret", action: "badges" },
-  });
-  expect(JSON.parse(result.value).ok).toBe(true);
-  expect(result.mime).toBe("application/json");
-  expect(outbound).toContain(
-    "https://sheets.googleapis.com/v4/spreadsheets/sheet-id/values/",
-  );
-  expect(outbound).not.toContain("test-secret");
-});
+      CacheService: {
+        getScriptCache: () => ({
+          get: () =>
+            JSON.stringify({
+              teacherId: "test-01",
+              expiresAt: Date.now() + 14400000,
+            }),
+        }),
+      },
+      ScriptApp: { getOAuthToken: () => "oauth-token" },
+      UrlFetchApp: {
+        fetch: (url: string, options: any) => {
+          outbound = url;
+          expect(options.headers.Authorization).toBe("Bearer oauth-token");
+          const name = decodeURIComponent(
+            new URL(url).pathname.split("/values/")[1],
+          ).replace(/^'|'$/g, "");
+          const rows = fixture.tables[name];
+          return {
+            getResponseCode: () => 200,
+            getContentText: () =>
+              JSON.stringify({
+                values: [
+                  Object.keys(rows[0]),
+                  ...rows.map((r) => Object.values(r)),
+                ],
+              }),
+          };
+        },
+      },
+      ContentService: {
+        MimeType: { JSON: "application/json" },
+        createTextOutput: (value: string) => ({
+          setMimeType: (mime: string) => ({ value, mime }),
+        }),
+      },
+    });
+    vm.runInContext(readFileSync("gas/Code.js", "utf8"), context);
+    const result = context.doGet({
+      parameter: { key: "test-secret", action, token: "a".repeat(64) },
+    });
+    expect(JSON.parse(result.value).ok).toBe(true);
+    if (action === "me") {
+      const me = JSON.parse(result.value).data;
+      expect(
+        me.collections.filter((b: any) => b.status === "획득"),
+      ).toHaveLength(3);
+      expect(
+        me.collections.find((b: any) => b.badgeId === "research").earnedAt,
+      ).toBe("2026-10-01");
+    }
+    expect(result.mime).toBe("application/json");
+    expect(outbound).toContain(
+      "https://sheets.googleapis.com/v4/spreadsheets/sheet-id/values/",
+    );
+    expect(outbound).not.toContain("test-secret");
+  },
+);

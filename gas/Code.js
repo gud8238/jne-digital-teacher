@@ -7,6 +7,15 @@ var BADGE_IDS = [
   "coaching",
   "master",
 ];
+var COLLECTION_COLUMNS = [
+  ["beginner", "AI디지털 입문자"],
+  ["edtech", "에듀테크 전문가"],
+  ["research", "수업연구 실천가"],
+  ["professional", "전문과정 이수자"],
+  ["lecturer", "강의 선도자"],
+  ["coaching", "현장코칭 전문가"],
+  ["master", "역량 마스터"],
+];
 function apiFailure(code) {
   throw { apiCode: code };
 }
@@ -93,7 +102,47 @@ function publicTeacher(row) {
   };
 }
 function getCollections(s, teacherId) {
-  var rows = s.readTable("배지별 수집현황").filter(function (r) {
+  var table = s.readTable("배지별 수집현황");
+  if (
+    table.some(function (r) {
+      return "AI디지털 입문자" in r;
+    })
+  ) {
+    assertData(
+      table.every(function (r) {
+        return !!r.teacher_id;
+      }),
+    );
+    assertData(
+      new Set(
+        table.map(function (r) {
+          return r.teacher_id;
+        }),
+      ).size === table.length,
+    );
+    var matches = table.filter(function (r) {
+      return r.teacher_id === teacherId;
+    });
+    assertData(matches.length === 1);
+    var wide = matches[0];
+    return BADGE_IDS.map(function (badgeId) {
+      var name = COLLECTION_COLUMNS.find(function (c) {
+        return c[0] === badgeId;
+      })[1];
+      var status = wide[name];
+      assertData(["획득", "미획득"].indexOf(status) !== -1);
+      var date = status === "획득" ? wide[name + " 취득일"] || null : null;
+      if (date)
+        assertData(
+          /^\d{4}-\d{2}-\d{2}$/.test(date) &&
+            Number.isFinite(Date.parse(date)) &&
+            new Date(date).toISOString().slice(0, 10) === date,
+        );
+      return { badgeId: badgeId, status: status, earnedAt: date };
+    });
+  }
+  // Retain the old layout during the atomic sheet migration and for rollback.
+  var rows = table.filter(function (r) {
     return r.teacher_id === teacherId;
   });
   assertData(
@@ -220,7 +269,14 @@ function doGet(e) {
           "기준상태",
           "표시순서",
         ],
-        "배지별 수집현황": ["teacher_id", "badge_id", "수집현황", "취득일"],
+        "배지별 수집현황":
+          headers.indexOf("badge_id") !== -1
+            ? ["teacher_id", "badge_id", "수집현황", "취득일"]
+            : ["teacher_id"].concat(
+                COLLECTION_COLUMNS.map(function (c) {
+                  return c[1];
+                }),
+              ),
       }[name];
       assertData(
         expected.every(function (h) {

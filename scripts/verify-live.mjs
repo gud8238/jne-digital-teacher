@@ -1,4 +1,12 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+const accounts = process.env.VERIFY_ACCOUNTS_FILE
+  ? JSON.parse(readFileSync(process.env.VERIFY_ACCOUNTS_FILE, "utf8"))
+  : [
+      { neisNumber: "0000000001", name: "테스트교원01", earnedCount: 3 },
+      { neisNumber: "0000000002", name: "테스트교원02", earnedCount: 0 },
+    ];
+assert.ok(Array.isArray(accounts) && accounts.length >= 2);
 const target = process.argv[2] || "http://localhost:8888";
 const gas = target === "--gas";
 let cookie = "";
@@ -44,17 +52,14 @@ const badges = await call("badges");
 assert.equal(badges.ok, true, JSON.stringify(badges.error));
 assert.equal(badges.data.length, 7);
 const failed = await call("login", {
-  neisNumber: "0000000001",
+  neisNumber: accounts[0].neisNumber,
   name: "틀린이름",
 });
 assert.equal(failed.ok, false);
-for (const [suffix, count] of [
-  ["1", 3],
-  ["2", 0],
-]) {
+for (const account of accounts) {
   const login = await call("login", {
-    neisNumber: "000000000" + suffix,
-    name: "테스트교원0" + suffix,
+    neisNumber: account.neisNumber,
+    name: account.name,
   });
   assert.equal(login.ok, true, JSON.stringify(login.error));
   const token = login.data.token;
@@ -62,7 +67,7 @@ for (const [suffix, count] of [
   assert.equal(me.ok, true, JSON.stringify(me.error));
   assert.equal(
     me.data.collections.filter((r) => r.status === "획득").length,
-    count,
+    account.earnedCount,
   );
   assert.equal("neisNumber" in me.data.teacher, false);
   assert.equal(Number.isSafeInteger(me.data.sessionExpiresAt), true);
@@ -76,5 +81,5 @@ if (!gas) {
   assert.equal((await call("logout")).ok, true);
 }
 console.log(
-  `${gas ? "GAS" : "Web API"} live verification passed: 7 badges, invalid login, 2 isolated accounts, logout rejection.`,
+  `${gas ? "GAS" : "Web API"} live verification passed: 7 badges, invalid login, ${accounts.length} isolated accounts, logout rejection.`,
 );

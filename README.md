@@ -4,7 +4,7 @@
 
 [웹앱 열기](https://jne-digital-teacher.netlify.app) · [GitHub](https://github.com/gud8238/jne-digital-teacher) · [검증 기록](docs/verification.md)
 
-`이메일로 로그인` → 나이스번호 `0000000001`, 이름 `테스트교원01`로 배지 3개인 합성 계정을 확인할 수 있습니다.
+`이메일로 로그인`을 선택하고 `교원` 탭에 등록된 현재 나이스번호·이름으로 로그인합니다. 초기 샘플과 실제 시트의 값은 다를 수 있습니다.
 
 ## 실행
 

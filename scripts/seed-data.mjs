@@ -1,4 +1,8 @@
 import { pathToFileURL } from "node:url";
+import {
+  pivotCollections,
+  collectionHeaders,
+} from "./collection-migration.mjs";
 const badges = [
   [
     "beginner",
@@ -94,13 +98,15 @@ const earned = [
 export const seed = {
   badges,
   teachers,
-  collections: teachers.flatMap((t, i) =>
-    badges.map((b) => [
-      t[0],
-      b[0],
-      earned[i].includes(b[0]) ? "획득" : "미획득",
-      earned[i].includes(b[0]) ? "2026-10-01" : "",
-    ]),
+  collections: pivotCollections(
+    teachers.flatMap((t, i) =>
+      badges.map((b) => [
+        t[0],
+        b[0],
+        earned[i].includes(b[0]) ? "획득" : "미획득",
+        earned[i].includes(b[0]) ? "2026-10-01" : "",
+      ]),
+    ),
   ),
 };
 export const headers = {
@@ -116,7 +122,7 @@ export const headers = {
     "기준상태",
     "표시순서",
   ],
-  collections: ["teacher_id", "badge_id", "수집현황", "취득일"],
+  collections: collectionHeaders,
 };
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
   console.log(JSON.stringify({ seed, headers }));
