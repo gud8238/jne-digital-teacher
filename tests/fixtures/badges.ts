@@ -41,6 +41,7 @@ export function collection(
   }));
 }
 export const me = {
+  sessionExpiresAt: Date.now() + 14400000,
   teacher: { id: "test-01", name: "테스트교원01", school: "테스트학교" },
   collections: collection(),
 };

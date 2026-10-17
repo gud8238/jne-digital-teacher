@@ -37,6 +37,13 @@ const login = JSON.stringify({
   name: "테스트교원01",
 });
 describe("브라우저 API 경계", () => {
+  it("쿠키가 이미 없어도 로그아웃을 성공시키고 쿠키를 삭제한다", async () => {
+    const { deps } = setup();
+    const response = await handleApi(req("logout", "POST"), deps);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("set-cookie")).toContain("Max-Age=0");
+    expect((await response.json()).data.loggedOut).toBe(true);
+  });
   it("로그인 토큰을 쿠키로만 제공하고 개인 현황을 반환한다", async () => {
     const { deps } = setup();
     const response = await handleApi(req("login", "POST", login), deps);
@@ -48,7 +55,9 @@ describe("브라우저 API 경계", () => {
     expect(cookie).toContain("Max-Age=14400");
     expect(JSON.stringify(await response.json())).not.toContain("token");
     const me = await handleApi(req("me", "GET", undefined, cookie), deps);
-    expect((await me.json()).data.collections).toHaveLength(7);
+    const profile = (await me.json()).data;
+    expect(profile.collections).toHaveLength(7);
+    expect(profile.sessionExpiresAt).toBe(Date.parse("2026-10-17T04:00:00Z"));
     expect(me.headers.get("cache-control")).toBe("no-store");
     const out = await handleApi(req("logout", "POST", undefined, cookie), deps);
     expect(out.headers.get("set-cookie")).toContain("Max-Age=0");

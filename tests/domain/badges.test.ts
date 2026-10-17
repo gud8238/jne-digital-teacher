@@ -42,6 +42,17 @@ describe("서버 데이터 검증", () => {
     expect(validateBadges(defs)).toHaveLength(7);
     expect(validateMe(me).teacher.name).toBe("테스트교원01");
   });
+  it("만료 시각이 누락되거나 잘못된 세션은 거절한다", () => {
+    for (const sessionExpiresAt of [
+      undefined,
+      null,
+      "tomorrow",
+      -1,
+      Infinity,
+    ]) {
+      expect(() => validateMe({ ...me, sessionExpiresAt })).toThrow();
+    }
+  });
   it.each(["missing", "duplicate", "unknown", "status", "date"])(
     "불완전한 수집행 %s를 미획득으로 숨기지 않는다",
     (mode) => {

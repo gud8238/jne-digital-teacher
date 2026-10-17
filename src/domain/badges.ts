@@ -25,7 +25,11 @@ export type BadgeCollection = {
   earnedAt: string | null;
 };
 export type Teacher = { id: string; name: string; school: string | null };
-export type Me = { teacher: Teacher; collections: BadgeCollection[] };
+export type Me = {
+  teacher: Teacher;
+  collections: BadgeCollection[];
+  sessionExpiresAt: number;
+};
 export type Progress = {
   earnedCount: number;
   expertCount: number;
@@ -105,6 +109,8 @@ export function validateMe(value: unknown): Me {
   const m = record(value),
     t = record(m.teacher);
   if (t.school !== null && typeof t.school !== "string") fail();
+  if (!Number.isSafeInteger(m.sessionExpiresAt) || m.sessionExpiresAt <= 0)
+    fail();
   return {
     teacher: {
       id: text(t.id),
@@ -112,6 +118,7 @@ export function validateMe(value: unknown): Me {
       school: t.school?.trim() || null,
     },
     collections: validateCollections(m.collections),
+    sessionExpiresAt: m.sessionExpiresAt,
   };
 }
 export function calculateProgress(

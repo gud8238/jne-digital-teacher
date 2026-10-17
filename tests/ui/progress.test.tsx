@@ -65,7 +65,11 @@ it("개인 현황을 계산하고 획득·미획득 필터를 적용한다", asy
 it("학교·취득일이 비어 있으면 임의 정보를 만들지 않는다", async () => {
   const rows = collection();
   rows[0].earnedAt = null;
-  view("my", { teacher: { ...me.teacher, school: null }, collections: rows });
+  view("my", {
+    ...me,
+    teacher: { ...me.teacher, school: null },
+    collections: rows,
+  });
   expect(await screen.findByText("취득일 미등록")).toBeVisible();
   expect(screen.queryByText("테스트학교")).toBeNull();
 });

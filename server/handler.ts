@@ -113,20 +113,20 @@ export async function handleApi(
       };
     } else {
       const token = readSession(request);
-      if (!token) {
+      if (!token && action !== "logout") {
         headers.set("set-cookie", sessionCookie(request, "", true));
         throw new ServiceError(401, "UNAUTHORIZED", "로그인이 필요합니다.");
       }
       if (action === "logout") {
         try {
-          await callGas({ action, token }, deps);
+          if (token) await callGas({ action, token }, deps);
         } catch (e) {
           if (!(e instanceof ServiceError && e.status === 401)) throw e;
         }
         headers.set("set-cookie", sessionCookie(request, "", true));
         data = { loggedOut: true };
       } else {
-        const result = await callGas({ action, token }, deps);
+        const result = await callGas({ action, token: token! }, deps);
         try {
           data = validateMe(result);
         } catch {

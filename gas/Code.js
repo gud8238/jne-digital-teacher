@@ -166,6 +166,7 @@ function handleRequest(p, s) {
       data: {
         teacher: publicTeacher(teacher),
         collections: getCollections(s, teacher.teacher_id),
+        sessionExpiresAt: session.expiresAt,
       },
     };
   } catch (e) {

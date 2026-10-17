@@ -18,7 +18,7 @@ GAS 프로젝트의 Script Properties에 `SPREADSHEET_ID`, `API_SHARED_SECRET`�
 
 Netlify Functions 환경에 `GAS_WEB_APP_URL`, `GAS_SHARED_SECRET`을 설정합니다. 로컬에서는 `.env.example`을 `.env`로 복사하고 값을 입력합니다. 비밀값·clasp 인증 파일·세션은 Git에 포함하지 않습니다. 서버 환경변수 변경 후에는 Netlify를 다시 배포합니다.
 
-GAS 소스 변경은 `npx clasp push`, 버전 및 웹앱 갱신은 `npx clasp deploy --deploymentId <기존 배포 ID>`로 수행합니다. 실행 계정의 시트 읽기 권한 동의가 필요합니다. 토큰은 4시간 동안 유효하며 서버 캐시에서 제거되면 다시 로그인해야 합니다.
+GAS 소스 변경은 `npx clasp push`, 버전 및 웹앱 갱신은 `npx clasp deploy --deploymentId <기존 배포 ID>`로 수행합니다. 실행 계정의 시트 읽기 권한 동의가 필요합니다. 토큰은 4시간 동안 유효하며 서버 캐시에서 제거되면 다시 로그인해야 합니다. 개인 조회에는 서버가 정한 만료 시각을 포함합니다. 열린 화면도 그 시각에 개인 데이터를 지우고, 탭으로 돌아오면 세션을 재확인합니다. 쿠키가 없어진 경우에도 로그아웃할 수 있습니다.
 
 ## 실행과 확인
 

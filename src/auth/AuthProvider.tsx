@@ -45,6 +45,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       epoch.current++;
     };
   }, []);
+  useEffect(() => {
+    if (!me) return;
+    function expire() {
+      epoch.current++;
+      setMe(null);
+      setLoading(false);
+      setError("");
+    }
+    function revalidate() {
+      if (document.hidden) return;
+      if (me!.sessionExpiresAt <= Date.now()) expire();
+      else void refresh();
+    }
+    const timer = window.setTimeout(
+      expire,
+      Math.max(0, me.sessionExpiresAt - Date.now()),
+    );
+    window.addEventListener("focus", revalidate);
+    document.addEventListener("visibilitychange", revalidate);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("focus", revalidate);
+      document.removeEventListener("visibilitychange", revalidate);
+    };
+  }, [me]);
   async function login(neisNumber: string, name: string) {
     const current = ++epoch.current;
     setMe(null);

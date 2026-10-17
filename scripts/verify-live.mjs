@@ -65,8 +65,15 @@ for (const [suffix, count] of [
     count,
   );
   assert.equal("neisNumber" in me.data.teacher, false);
+  assert.equal(Number.isSafeInteger(me.data.sessionExpiresAt), true);
+  assert.ok(me.data.sessionExpiresAt > Date.now());
+  assert.ok(me.data.sessionExpiresAt <= Date.now() + 14400000);
   assert.equal((await call("logout", gas ? { token } : {})).ok, true);
   assert.equal((await call("me", gas ? { token } : {})).ok, false);
+}
+if (!gas) {
+  cookie = "";
+  assert.equal((await call("logout")).ok, true);
 }
 console.log(
   `${gas ? "GAS" : "Web API"} live verification passed: 7 badges, invalid login, 2 isolated accounts, logout rejection.`,

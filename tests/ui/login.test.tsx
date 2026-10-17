@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, afterEach, it, expect, vi } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { AuthProvider, useAuth } from "../../src/auth/AuthProvider";
@@ -47,6 +47,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 function Status() {
   const auth = useAuth();
@@ -111,6 +112,39 @@ it("새로고침 시 서버 세션을 복원한다", async () => {
   expect(
     await screen.findByText("테스트교원01", { selector: "output" }),
   ).toBeVisible();
+});
+it("열어 둔 화면에서도 서버가 정한 만료 시각에 개인정보를 지운다", async () => {
+  vi.useFakeTimers();
+  vi.stubGlobal("fetch", async () =>
+    Response.json({
+      ok: true,
+      data: {
+        ...me,
+        sessionExpiresAt: Date.now() + 1000,
+      },
+    }),
+  );
+  view();
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(0);
+  });
+  expect(
+    screen.getByText("테스트교원01", { selector: "output" }),
+  ).toBeVisible();
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(1000);
+  });
+  expect(screen.getByText("미로그인", { selector: "output" })).toBeVisible();
+});
+it("다른 탭에서 세션이 사라진 뒤 돌아오면 다시 확인하고 개인정보를 지운다", async () => {
+  signedIn = true;
+  view();
+  await screen.findByText("테스트교원01", { selector: "output" });
+  signedIn = false;
+  await act(async () => {
+    window.dispatchEvent(new Event("focus"));
+  });
+  expect(screen.getByText("미로그인", { selector: "output" })).toBeVisible();
 });
 it("초기 세션 조회보다 빠른 로그인 실패 후에도 로딩을 끝낸다", async () => {
   vi.stubGlobal("fetch", async (url: string) =>

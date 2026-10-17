@@ -132,3 +132,21 @@ test("긴 이름을 PC와 모바일에서 가로 넘침 없이 표시한다", as
     ).toBe(true);
   }
 });
+
+test("인증 후 쿠키가 사라져도 로그아웃하면 개인 화면을 닫는다", async ({
+  page,
+  context,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "이메일로 로그인" }).click();
+  await page.getByLabel("나이스번호").fill("0000000001");
+  await page.getByLabel("이름", { exact: true }).fill("테스트교원01");
+  await page.getByRole("button", { name: "로그인하기" }).click();
+  await expect(page.getByLabel("전체 획득 배지")).toHaveText("3 / 7");
+  await context.clearCookies();
+  await page.getByRole("button", { name: "로그아웃", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "이메일로 로그인" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("전체 획득 배지")).toHaveCount(0);
+});
