@@ -41,14 +41,19 @@
 }
 .home-art {
   position: absolute;
-  width: 780px;
-  max-width: 110%;
-  height: 435px;
+  width: 700px;
+  max-width: 100%;
+  aspect-ratio: 700 / 435;
   bottom: 0;
-  left: -25px;
-  background: url("/assets/reference-home.png") no-repeat -20px -284px/1180px
-    885px;
-  mask-image: linear-gradient(to right, #000 0%, #000 92%, transparent);
+  left: 50%;
+  transform: translateX(-50%);
+  /* Scale the reference crop with its frame to keep both teachers visible. */
+  background: url("/assets/reference-home.png") no-repeat 4.1667% 63.1111% /
+    168.5714% auto;
+  mask-image:
+    linear-gradient(to right, transparent, #000 5%, #000 95%, transparent),
+    linear-gradient(transparent, #000 5%, #000 85%, transparent);
+  mask-composite: intersect;
 }
 .login-card {
   padding: 40px 34px;
@@ -197,11 +202,6 @@
   .home-visual > p {
     font-size: 15px;
   }
-  .home-art {
-    background-size: 1032px 774px;
-    background-position: -24px -245px;
-    height: 400px;
-  }
   .login-card {
     padding: 30px 25px;
     min-height: 550px;
@@ -230,11 +230,6 @@
   }
   .home-visual h1 {
     font-size: 34px;
-  }
-  .home-art {
-    background-size: 900px 675px;
-    background-position: -15px -213px;
-    height: 340px;
   }
   .login-card {
     padding: 25px 22px;
@@ -284,13 +279,10 @@
     width: 360px;
     max-width: none;
     height: 355px;
-    left: 50%;
-    transform: translateX(-50%);
     bottom: -4px;
     background-image: url("/assets/reference-mobile.png");
     background-size: 1536px 1024px;
     background-position: -24px -362px;
-    mask-image: linear-gradient(#000 88%, transparent 100%);
   }
   .login-card {
     width: calc(100% - 32px);

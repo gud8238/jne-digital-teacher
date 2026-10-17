@@ -11,11 +11,6 @@
   height: auto;
 }
 @media (min-width: 701px) {
-  .home-art {
-    width: 700px;
-    max-width: 100%;
-    left: 0;
-  }
   .shortcut-art {
     width: 86px;
   }
@@ -58,9 +53,6 @@
   overflow-wrap: anywhere;
 }
 @media (max-width: 700px) {
-  .home-art {
-    mask-image: linear-gradient(transparent, #000 5%, #000 88%, transparent);
-  }
   .guide-banner::before {
     content: "";
     position: absolute;
