@@ -53,6 +53,9 @@ function Status() {
   return (
     <>
       <output>{auth.me?.teacher.name || "미로그인"}</output>
+      <output aria-label="세션 복원 상태">
+        {auth.loading ? "복원 중" : "준비 완료"}
+      </output>
       <button onClick={() => void auth.logout()}>테스트 로그아웃</button>
     </>
   );
@@ -108,4 +111,31 @@ it("새로고침 시 서버 세션을 복원한다", async () => {
   expect(
     await screen.findByText("테스트교원01", { selector: "output" }),
   ).toBeVisible();
+});
+it("초기 세션 조회보다 빠른 로그인 실패 후에도 로딩을 끝낸다", async () => {
+  vi.stubGlobal("fetch", async (url: string) =>
+    url === "/api/me"
+      ? new Promise<Response>(() => {})
+      : Response.json(
+          {
+            ok: false,
+            error: {
+              code: "UNAUTHORIZED",
+              message: "나이스번호와 이름을 확인해 주세요.",
+            },
+          },
+          { status: 401 },
+        ),
+  );
+  view();
+  await userEvent.click(
+    screen.getByRole("button", { name: "이메일로 로그인" }),
+  );
+  await userEvent.type(screen.getByLabelText("나이스번호"), "0000000001");
+  await userEvent.type(screen.getByLabelText("이름"), "다른이름");
+  await userEvent.click(screen.getByRole("button", { name: "로그인하기" }));
+  await screen.findByRole("alert");
+  expect(screen.getByLabelText("세션 복원 상태")).toHaveTextContent(
+    "준비 완료",
+  );
 });

@@ -1,6 +1,6 @@
 # Digital Teacher Badge Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 제공된 PC·모바일 디자인을 사용해 교원별 디지털배지 현황과 성장경로를 조회하는 프로토타입을 구현하고 GitHub·Netlify에 CLI로 배포한다.
 
@@ -71,11 +71,11 @@
 
 **Interfaces:** Consumes 승인된 7개 ID·계산식. Produces `validateBadges(value: unknown): BadgeDefinition[]`, `validateMe(value: unknown): Me`, `calculateProgress(definitions: BadgeDefinition[], collections: BadgeCollection[]): Progress`, `recommendBadges(definitions: BadgeDefinition[], collections: BadgeCollection[]): BadgeDefinition[]`.
 
-- [ ] 개발 의존성과 `test`, `typecheck`, `lint`, `build`, `dev` 명령을 구성한다. fixture와 실패 테스트를 먼저 작성한다. `beginner`, `edtech`, `research` 획득 시 `expect(calculateProgress(defs, rows)).toMatchObject({ earnedCount: 3, expertCount: 2, overallPercent: 43, expertPercent: 40, remainingExperts: 1, masterState: 'in-progress' })`를 검증한다. 전문가 3종일 때 미발급은 eligible, master 획득은 awarded여야 한다. 누락·중복·미정의 ID·상태·잘못된 날짜는 reject한다. 추천 첫 항목은 미획득 professional이어야 한다.
-- [ ] `npm test -- tests/domain/badges.test.ts`를 실행해 미구현 함수 때문에 실패함을 확인한다.
-- [ ] 정의된 순수 함수와 타입을 구현한다. 7개 정의와 7개 수집행을 검사하고 정렬은 추천우선순위 다음 표시순서로 결정한다.
-- [ ] 같은 테스트, `npm run typecheck`, `npm run lint`를 실행해 통과를 확인한다. 신규 저장소이므로 기존 제품 테스트는 없다는 사실을 기록한다.
-- [ ] 관련 파일만 stage하고 `feat: add badge domain and validation`으로 커밋한다. `.env*`, `.clasprc*`, `.netlify/`, node_modules, dist, source 원본, 검증 산출물을 추적에서 제외한다.
+- [x] 개발 의존성과 `test`, `typecheck`, `lint`, `build`, `dev` 명령을 구성한다. fixture와 실패 테스트를 먼저 작성한다. `beginner`, `edtech`, `research` 획득 시 `expect(calculateProgress(defs, rows)).toMatchObject({ earnedCount: 3, expertCount: 2, overallPercent: 43, expertPercent: 40, remainingExperts: 1, masterState: 'in-progress' })`를 검증한다. 전문가 3종일 때 미발급은 eligible, master 획득은 awarded여야 한다. 누락·중복·미정의 ID·상태·잘못된 날짜는 reject한다. 추천 첫 항목은 미획득 professional이어야 한다.
+- [x] `npm test -- tests/domain/badges.test.ts`를 실행해 미구현 함수 때문에 실패함을 확인한다.
+- [x] 정의된 순수 함수와 타입을 구현한다. 7개 정의와 7개 수집행을 검사하고 정렬은 추천우선순위 다음 표시순서로 결정한다.
+- [x] 같은 테스트, `npm run typecheck`, `npm run lint`를 실행해 통과를 확인한다. 신규 저장소이므로 기존 제품 테스트는 없다는 사실을 기록한다.
+- [x] 관련 파일만 stage하고 `feat: add badge domain and validation`으로 커밋한다. `.env*`, `.clasprc*`, `.netlify/`, node_modules, dist, source 원본, 검증 산출물을 추적에서 제외한다.
 
 ### Task 2: GAS 인증·개인조회·시트 검증
 
@@ -83,11 +83,11 @@
 
 **Interfaces:** Consumes Task 1의 응답 계약. Produces `doGet(e)`와 내부 `handleRequest(params, services): ApiResult<unknown>`; services는 시트 읽기·세션 get/put/remove·현재시각·토큰발급을 주입한다. login은 `{ teacher, token }`, me는 `Me`, badges는 `BadgeDefinition[]`, logout은 `{ loggedOut: true }`를 반환한다. 실제 doGet은 Script Properties의 `SPREADSHEET_ID`, `API_SHARED_SECRET`을 사용한다.
 
-- [ ] Node vm에서 GAS 파일을 로드하는 테스트를 먼저 작성한다. `0000000001`과 `테스트교원01`의 앞뒤 공백은 허용하되 앞자리 0 제거·이름 불일치·중지 계정은 거절한다. 세션 없는 me, 다른 teacher_id 주입, 4시간 경과, logout 후 토큰은 거절한다. 올바르지 않은 공유 비밀값·action은 거절하고 중복 교원·수집행 누락·중복·미정의 상태는 데이터 오류를 반환한다.
-- [ ] `npm test -- tests/gas/api.test.ts`를 실행하고 구현 부재로 실패하는지 확인한다.
-- [ ] GAS doGet과 테스트 주입 서비스를 구현한다. 배포용 서비스는 SpreadsheetApp의 getDisplayValues로 나이스번호 문자열을 보존하고 CacheService에 만료 포함 세션을 저장한다. 세션 소실은 401로 처리한다. UUID 두 개를 연결해 토큰을 만들고 외부에 교원 명단이나 비밀값을 반환하지 않는다.
-- [ ] 같은 테스트를 실행해 통과를 확인하고 doGet 응답에 ContentService JSON MIME이 지정되는지 검증한다.
-- [ ] `feat: add GAS sheet authentication and badge API`로 커밋한다.
+- [x] Node vm에서 GAS 파일을 로드하는 테스트를 먼저 작성한다. `0000000001`과 `테스트교원01`의 앞뒤 공백은 허용하되 앞자리 0 제거·이름 불일치·중지 계정은 거절한다. 세션 없는 me, 다른 teacher_id 주입, 4시간 경과, logout 후 토큰은 거절한다. 올바르지 않은 공유 비밀값·action은 거절하고 중복 교원·수집행 누락·중복·미정의 상태는 데이터 오류를 반환한다.
+- [x] `npm test -- tests/gas/api.test.ts`를 실행하고 구현 부재로 실패하는지 확인한다.
+- [x] GAS doGet과 테스트 주입 서비스를 구현한다. 배포용 서비스는 SpreadsheetApp의 getDisplayValues로 나이스번호 문자열을 보존하고 CacheService에 만료 포함 세션을 저장한다. 세션 소실은 401로 처리한다. UUID 두 개를 연결해 토큰을 만들고 외부에 교원 명단이나 비밀값을 반환하지 않는다.
+- [x] 같은 테스트를 실행해 통과를 확인하고 doGet 응답에 ContentService JSON MIME이 지정되는지 검증한다.
+- [x] `feat: add GAS sheet authentication and badge API`로 커밋한다.
 
 ### Task 3: 지정 시트 구성과 GAS 실제 연결
 
@@ -95,11 +95,11 @@
 
 **Interfaces:** Consumes Task 2의 탭·열 계약. Produces 지정 스프레드시트의 교원·배지소개·배지별 수집현황 탭, 실제 GAS 실행 URL, 서버 전용 공유 비밀값. 환경변수 이름은 `GAS_WEB_APP_URL`, `GAS_SHARED_SECRET`으로 고정한다.
 
-- [ ] seed-data의 테스트를 `tests/gas/seed.test.ts`에 먼저 작성한다. 배지 7종·전문가 5종, 교원마다 수집행 7개, 합성 교원만 존재하는지 검사한다. 테스트교원01은 입문+전문가 2종, 02는 0개, 03은 입문+전문가 3종·마스터 미발급, 04는 모든 배지 획득으로 둔다. 나이스번호는 각각 `0000000001`부터 `0000000004`까지 사용한다.
-- [ ] `npm test -- tests/gas/seed.test.ts`의 실패를 확인한 후 승인된 PPT 설명·준비안내·표시순서·합성 데이터 배열을 구현하고 테스트를 통과시킨다.
-- [ ] Google Sheets 편집 스킬의 필요한 참조를 읽고 메타데이터·대상 셀을 재확인한다. 기존 탭을 보존하고 새 탭에 명시적 열·텍스트 나이스번호·획득/미획득 유효성 검사와 고정 헤더를 구성한다. 충돌하면 기존 데이터를 덮어쓰지 않고 신규 테스트 행만 구분한다. 쓰기 후 범위와 유효성 검사를 다시 읽어 확인한다.
-- [ ] clasp를 설치·인증 확인하고 GAS 프로젝트를 만들거나 이 작업에서 만든 프로젝트를 재사용한다. 로컬 GAS 테스트 통과 후 API 통합 테스트용 웹앱을 배포한다. Script Properties에 시트 ID와 공유 비밀값을 설정하고 익명 실행 URL이 실제 JSON을 반환하는지 확인한다. OAuth 동의가 필요하면 사용자에게 필요한 동작을 정확히 알리고 그 외 독립 작업은 계속한다. 자격증명과 비밀값을 출력·커밋하지 않는다.
-- [ ] 실제 GAS의 badges, 정상·실패 login, me, logout을 합성 계정으로 확인한다. 테스트 결과·운영 절차를 문서에 기록하고 비밀값 없는 파일만 `feat: initialize badge sheet and GAS integration`으로 커밋한다.
+- [x] seed-data의 테스트를 `tests/gas/seed.test.ts`에 먼저 작성한다. 배지 7종·전문가 5종, 교원마다 수집행 7개, 합성 교원만 존재하는지 검사한다. 테스트교원01은 입문+전문가 2종, 02는 0개, 03은 입문+전문가 3종·마스터 미발급, 04는 모든 배지 획득으로 둔다. 나이스번호는 각각 `0000000001`부터 `0000000004`까지 사용한다.
+- [x] `npm test -- tests/gas/seed.test.ts`의 실패를 확인한 후 승인된 PPT 설명·준비안내·표시순서·합성 데이터 배열을 구현하고 테스트를 통과시킨다.
+- [x] Google Sheets 편집 스킬의 필요한 참조를 읽고 메타데이터·대상 셀을 재확인한다. 기존 탭을 보존하고 새 탭에 명시적 열·텍스트 나이스번호·획득/미획득 유효성 검사와 고정 헤더를 구성한다. 충돌하면 기존 데이터를 덮어쓰지 않고 신규 테스트 행만 구분한다. 쓰기 후 범위와 유효성 검사를 다시 읽어 확인한다.
+- [x] clasp를 설치·인증 확인하고 GAS 프로젝트를 만들거나 이 작업에서 만든 프로젝트를 재사용한다. 로컬 GAS 테스트 통과 후 API 통합 테스트용 웹앱을 배포한다. Script Properties에 시트 ID와 공유 비밀값을 설정하고 익명 실행 URL이 실제 JSON을 반환하는지 확인한다. OAuth 동의가 필요하면 사용자에게 필요한 동작을 정확히 알리고 그 외 독립 작업은 계속한다. 자격증명과 비밀값을 출력·커밋하지 않는다.
+- [x] 실제 GAS의 badges, 정상·실패 login, me, logout을 합성 계정으로 확인한다. 테스트 결과·운영 절차를 문서에 기록하고 비밀값 없는 파일만 `feat: initialize badge sheet and GAS integration`으로 커밋한다.
 
 ### Task 4: Netlify 중계 API와 쿠키 세션
 
@@ -107,11 +107,11 @@
 
 **Interfaces:** Consumes Task 2·3의 GAS 계약·환경변수. Produces `handleApi(request: Request, dependencies?: ApiDependencies): Promise<Response>`; 의존성은 fetch·환경변수를 주입한다. GET badges, POST login, GET me, POST logout만 허용한다. 쿠키 이름은 `jne_badge_session`이다.
 
-- [ ] 실패 테스트를 먼저 작성한다. 올바른 메서드·경로·JSON을 검사하고 잘못된 JSON·빈 입력은 400, 없는 세션은 401, 잘못된 메서드는 405여야 한다. 세션 쿠키가 HttpOnly·SameSite=Lax·Max-Age=14400이며 배포 URL에서 Secure인지 확인한다. GAS HTML·구문 오류·응답 지연·7개 행 누락은 502/503으로 변환하고 비밀값·토큰을 응답 본문에 노출하지 않는다. 로그인·로그아웃에는 교차 출처 Origin을 거절한다.
-- [ ] `npm test -- tests/server/api.test.ts`를 실행해 미구현으로 실패함을 확인한다.
-- [ ] 핸들러·쿠키·타임아웃 있는 GAS 클라이언트를 구현한다. GAS 요청은 redirect follow를 사용한다. 개인 응답은 no-store로 설정하고 세션 token은 로그인 응답 본문에서 제거한다. config.path는 `/api/*`로 설정하고 SPA fallback보다 API 처리를 우선한다.
-- [ ] 테스트·타입 검사 후 `netlify dev`로 실제 badges·login·me·logout을 호출한다. Cookie jar를 이용해 로그아웃 후 me가 401인지 확인한다.
-- [ ] `feat: proxy GAS API with server sessions`로 커밋한다.
+- [x] 실패 테스트를 먼저 작성한다. 올바른 메서드·경로·JSON을 검사하고 잘못된 JSON·빈 입력은 400, 없는 세션은 401, 잘못된 메서드는 405여야 한다. 세션 쿠키가 HttpOnly·SameSite=Lax·Max-Age=14400이며 배포 URL에서 Secure인지 확인한다. GAS HTML·구문 오류·응답 지연·7개 행 누락은 502/503으로 변환하고 비밀값·토큰을 응답 본문에 노출하지 않는다. 로그인·로그아웃에는 교차 출처 Origin을 거절한다.
+- [x] `npm test -- tests/server/api.test.ts`를 실행해 미구현으로 실패함을 확인한다.
+- [x] 핸들러·쿠키·타임아웃 있는 GAS 클라이언트를 구현한다. GAS 요청은 redirect follow를 사용한다. 개인 응답은 no-store로 설정하고 세션 token은 로그인 응답 본문에서 제거한다. config.path는 `/api/*`로 설정하고 SPA fallback보다 API 처리를 우선한다.
+- [x] 테스트·타입 검사 후 `netlify dev`로 실제 badges·login·me·logout을 호출한다. Cookie jar를 이용해 로그아웃 후 me가 401인지 확인한다.
+- [x] `feat: proxy GAS API with server sessions`로 커밋한다.
 
 ### Task 5: 공통 화면·이미지·메인·로그인
 
@@ -119,11 +119,11 @@
 
 **Interfaces:** Consumes Task 4의 API. Produces `useAuth(): { me: Me | null; loading: boolean; login(neisNumber: string, name: string): Promise<void>; logout(): Promise<void>; refresh(): Promise<void> }`; `apiRequest<T>(path: string, init?: RequestInit): Promise<T>`; BadgeImage는 badgeId·locked·size·alt를 받는다.
 
-- [ ] UI 실패 테스트를 작성한다. 로그인 수단 두 개와 작은 안내 문구, 이메일 로그인 후 나이스번호·이름 폼, 아이모두 클릭 시 요청 없이 준비 중 안내, 오류 후 재입력·재시도, 중복 제출 방지, 세션 복원, 계정 변경 후 이전 데이터 제거를 검증한다. `0000000001`이 문자열 그대로 전송되는지 검사한다.
-- [ ] `npm test -- tests/ui/login.test.tsx`로 미구현 실패를 확인한다.
-- [ ] frontend-design·reference-driven-ui-assets·React 성능 스킬을 적용하고 네 화면의 공통 뼈대와 로그인 흐름을 구현한다. 기존 PNG를 영문 이름으로 public/assets에 복사하고 원본을 보존한다. 장식 인물은 시안의 해당 영역을 CSS crop으로 사용하고 클릭 UI는 HTML로 구현한다. 모바일 4개 내비게이션, 보호 경로 복귀, 로그아웃과 없는 경로를 처리한다.
-- [ ] UI 테스트·타입 검사·린트·빌드를 통과시키고 브라우저에서 실제 로그인과 360/1440px 메인 배치를 확인한다. 연속된 긴 한국어 이름도 헤더에서 넘치지 않아야 한다.
-- [ ] `feat: build responsive shell and teacher login`으로 커밋한다.
+- [x] UI 실패 테스트를 작성한다. 로그인 수단 두 개와 작은 안내 문구, 이메일 로그인 후 나이스번호·이름 폼, 아이모두 클릭 시 요청 없이 준비 중 안내, 오류 후 재입력·재시도, 중복 제출 방지, 세션 복원, 계정 변경 후 이전 데이터 제거를 검증한다. `0000000001`이 문자열 그대로 전송되는지 검사한다.
+- [x] `npm test -- tests/ui/login.test.tsx`로 미구현 실패를 확인한다.
+- [x] frontend-design·reference-driven-ui-assets·React 성능 스킬을 적용하고 네 화면의 공통 뼈대와 로그인 흐름을 구현한다. 기존 PNG를 영문 이름으로 public/assets에 복사하고 원본을 보존한다. 장식 인물은 시안의 해당 영역을 CSS crop으로 사용하고 클릭 UI는 HTML로 구현한다. 모바일 4개 내비게이션, 보호 경로 복귀, 로그아웃과 없는 경로를 처리한다.
+- [x] UI 테스트·타입 검사·린트·빌드를 통과시키고 브라우저에서 실제 로그인과 360/1440px 메인 배치를 확인한다. 연속된 긴 한국어 이름도 헤더에서 넘치지 않아야 한다.
+- [x] `feat: build responsive shell and teacher login`으로 커밋한다.
 
 ### Task 6: 배지소개와 상세 설명
 
@@ -131,11 +131,11 @@
 
 **Interfaces:** Consumes apiRequest·BadgeDefinition·BadgeImage. Produces `BadgeDetail({ badge, collection?, onClose? })`와 `Roadmap({ definitions, collections? })`. 상세 패널은 버튼으로 열고 닫으며 포커스를 복원한다.
 
-- [ ] UI 실패 테스트를 작성한다. API에서 받은 7개 배지 중 선택한 항목의 설명·기준이 표시되고, 전체/입문/전문가/마스터 필터 결과가 7/1/5/1인지 검사한다. API 실패 시 재시도가 가능하고 정적 설명으로 바뀌지 않는지 검증한다. 키보드 선택·닫기·포커스 복원을 검사한다.
-- [ ] `npm test -- tests/ui/badges.test.tsx`로 실패를 확인한다.
-- [ ] PC의 3단계 체계·7개 선택 카드·상세 영역과 모바일의 세로 목록·펼침 상세를 구현한다. 설명은 실제 시트에서 읽고 잠정 기준 안내를 표시한다.
-- [ ] 같은 UI 테스트와 실제 API 선택 동작을 확인하고 390/768/1440px에서 목록·패널의 가로 넘침과 읽기 순서를 확인한다.
-- [ ] `feat: add interactive badge catalog`로 커밋한다.
+- [x] UI 실패 테스트를 작성한다. API에서 받은 7개 배지 중 선택한 항목의 설명·기준이 표시되고, 전체/입문/전문가/마스터 필터 결과가 7/1/5/1인지 검사한다. API 실패 시 재시도가 가능하고 정적 설명으로 바뀌지 않는지 검증한다. 키보드 선택·닫기·포커스 복원을 검사한다.
+- [x] `npm test -- tests/ui/badges.test.tsx`로 실패를 확인한다.
+- [x] PC의 3단계 체계·7개 선택 카드·상세 영역과 모바일의 세로 목록·펼침 상세를 구현한다. 설명은 실제 시트에서 읽고 잠정 기준 안내를 표시한다.
+- [x] 같은 UI 테스트와 실제 API 선택 동작을 확인하고 390/768/1440px에서 목록·패널의 가로 넘침과 읽기 순서를 확인한다.
+- [x] `feat: add interactive badge catalog`로 커밋한다.
 
 ### Task 7: 개인 배지함과 인증안내·추천
 
@@ -143,11 +143,11 @@
 
 **Interfaces:** Consumes AuthProvider의 Me, Task 1 계산 함수, Task 6 상세 패널·로드맵. Produces 동일 수치와 상태를 사용하는 배지함·인증안내 페이지.
 
-- [ ] UI 실패 테스트를 작성한다. 테스트교원01의 전체 3/7·43%·전문가 2/5·40%·남은 1개를 두 페이지에서 검증한다. 전체/획득/미획득/마스터 필터 결과 7/3/4/1, 취득일 공란의 `취득일 미등록`, 학교 공란의 줄 생략을 확인한다. 전문가 3종·마스터 미발급은 `조건 충족 · 발급 전`, 마스터 기록은 `마스터 달성`이어야 한다. 추천에서 획득 항목을 제외하며 실제 신청은 전송하지 않는지 검사한다.
-- [ ] `npm test -- tests/ui/progress.test.tsx`로 실패를 확인한다.
-- [ ] PC 단계별 배치, 모바일 3열 배지함과 프로필 요약, 인증안내의 개인 로드맵·현황·추천을 구현한다. 잠금·체크·회색 상태를 기존 PNG와 CSS로 표시한다. 로그인 전 인증안내는 공개 기준과 로그인 유도를 표시한다.
-- [ ] UI 테스트·전체 단위 테스트·타입 검사·린트·빌드를 실행하고 두 합성 계정으로 실제 조회·로그아웃·재로그인을 확인한다.
-- [ ] `feat: add personal badge collection and growth guide`로 커밋한다.
+- [x] UI 실패 테스트를 작성한다. 테스트교원01의 전체 3/7·43%·전문가 2/5·40%·남은 1개를 두 페이지에서 검증한다. 전체/획득/미획득/마스터 필터 결과 7/3/4/1, 취득일 공란의 `취득일 미등록`, 학교 공란의 줄 생략을 확인한다. 전문가 3종·마스터 미발급은 `조건 충족 · 발급 전`, 마스터 기록은 `마스터 달성`이어야 한다. 추천에서 획득 항목을 제외하며 실제 신청은 전송하지 않는지 검사한다.
+- [x] `npm test -- tests/ui/progress.test.tsx`로 실패를 확인한다.
+- [x] PC 단계별 배치, 모바일 3열 배지함과 프로필 요약, 인증안내의 개인 로드맵·현황·추천을 구현한다. 잠금·체크·회색 상태를 기존 PNG와 CSS로 표시한다. 로그인 전 인증안내는 공개 기준과 로그인 유도를 표시한다.
+- [x] UI 테스트·전체 단위 테스트·타입 검사·린트·빌드를 실행하고 두 합성 계정으로 실제 조회·로그아웃·재로그인을 확인한다.
+- [x] `feat: add personal badge collection and growth guide`로 커밋한다.
 
 ### Task 8: 통합 검증·리뷰·GitHub push·Netlify 배포
 
@@ -167,7 +167,7 @@
 - 타입과 경로 이름을 각 작업의 Interfaces에 맞췄고 개인 조회 응답에서 나이스번호를 제외했다.
 - Review Focus의 5개 실패 모드를 각 소유 작업의 테스트에 포함했다.
 - GAS 통합용 웹앱 배포는 로컬 GAS 테스트 통과 후 수행하며, 사용자용 FE의 GitHub push·Netlify 배포는 전체 로컬 검증 후 수행한다.
-- 실행 방식은 사용자 선택 전이다. 권장안은 현재 세션에서 직접 순서대로 구현하는 Native 방식이다. Task 2~7이 앞선 API·세션·컴포넌트 계약을 이어 사용하므로 같은 맥락을 유지하기 쉽다.
+- 실행 방식은 사용자가 1번으로 선택한 현재 폴더 Native 방식이다. Task 2~7이 앞선 API·세션·컴포넌트 계약을 이어 사용하므로 같은 맥락을 유지하기 쉽다.
 
 ## 확인한 현재 문서
 

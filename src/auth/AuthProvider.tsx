@@ -48,15 +48,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(neisNumber: string, name: string) {
     const current = ++epoch.current;
     setMe(null);
-    await apiRequest("login", {
-      method: "POST",
-      body: JSON.stringify({ neisNumber, name }),
-    });
-    const data = validateMe(await apiRequest("me"));
-    if (current === epoch.current) {
-      setMe(data);
-      setError("");
-      setLoading(false);
+    setError("");
+    try {
+      await apiRequest("login", {
+        method: "POST",
+        body: JSON.stringify({ neisNumber, name }),
+      });
+      const data = validateMe(await apiRequest("me"));
+      if (current === epoch.current) setMe(data);
+    } finally {
+      if (current === epoch.current) setLoading(false);
     }
   }
   async function logout() {
