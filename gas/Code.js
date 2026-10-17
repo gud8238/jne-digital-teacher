@@ -61,16 +61,16 @@ function handleRequest(p,s) {
 function doGet(e) {
   var properties=PropertiesService.getScriptProperties();
   var cache=CacheService.getScriptCache();
-  var spreadsheet;
   var result=handleRequest(e&&e.parameter||{}, {
     secret:properties.getProperty('API_SHARED_SECRET'),
     readTable:function(name){
-      if(!spreadsheet) spreadsheet=SpreadsheetApp.openById(properties.getProperty('SPREADSHEET_ID'));
-      var sheet=spreadsheet.getSheetByName(name); assertData(!!sheet);
-      var values=sheet.getDataRange().getDisplayValues(); var headers=values.shift();
+      var url='https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(properties.getProperty('SPREADSHEET_ID'))+'/values/'+encodeURIComponent("'"+name.replace(/'/g,"''")+"'")+'?valueRenderOption=FORMATTED_VALUE';
+      var response=UrlFetchApp.fetch(url,{headers:{Authorization:'Bearer '+ScriptApp.getOAuthToken()},muteHttpExceptions:true});
+      if(response.getResponseCode()!==200) throw new Error('Sheets API request failed');
+      var values=JSON.parse(response.getContentText()).values||[]; var headers=values.shift()||[];
       var expected={'교원':['teacher_id','나이스번호','이름','소속학교','활성여부'],'배지소개':['badge_id','단계','배지명','설명','취득기준','준비안내','추천우선순위','기준상태','표시순서'],'배지별 수집현황':['teacher_id','badge_id','수집현황','취득일']}[name];
       assertData(expected.every(function(h){return headers.indexOf(h)!==-1;})&&new Set(headers).size===headers.length);
-      return values.filter(function(row){return row.some(function(v){return v!=='';});}).map(function(row){var obj={};headers.forEach(function(h,i){obj[h]=row[i];});return obj;});
+      return values.filter(function(row){return row.some(function(v){return v!=='';});}).map(function(row){var obj={};headers.forEach(function(h,i){obj[h]=row[i]===undefined?'':String(row[i]);});return obj;});
     },
     getSession:function(token){var value=cache.get('session:'+token);return value?JSON.parse(value):null;},
     putSession:function(token,value){cache.put('session:'+token,JSON.stringify(value),14400);},

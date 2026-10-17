@@ -1,5 +1,7 @@
 import { describe,it,expect } from 'vitest';
 import { runtime } from './runtime';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
 const login={action:'login',neisNumber:'0000000001',name:'테스트교원01'};
 describe('GAS 인증과 데이터 경계',()=>{
   it('앞자리 0과 공백을 보존해 본인만 로그인한다',()=>{
@@ -31,4 +33,16 @@ describe('GAS 인증과 데이터 경계',()=>{
     const r=runtime(); r.tables['교원'].push({...r.tables['교원'][0],teacher_id:'duplicate'});
     expect(r.call(login).error.code).toBe('DATA_ERROR');
   });
+});
+it('실제 doGet 어댑터가 읽기 전용 Sheets API로 JSON을 반환한다',()=>{
+  const fixture=runtime();let outbound='';
+  const context=vm.createContext({
+    PropertiesService:{getScriptProperties:()=>({getProperty:(key:string)=>key==='SPREADSHEET_ID'?'sheet-id':'test-secret'})},
+    CacheService:{getScriptCache:()=>({})},ScriptApp:{getOAuthToken:()=> 'oauth-token'},
+    UrlFetchApp:{fetch:(url:string,options:any)=>{outbound=url;expect(options.headers.Authorization).toBe('Bearer oauth-token');const rows=fixture.tables['배지소개'];return {getResponseCode:()=>200,getContentText:()=>JSON.stringify({values:[Object.keys(rows[0]),...rows.map(r=>Object.values(r))]})};}},
+    ContentService:{MimeType:{JSON:'application/json'},createTextOutput:(value:string)=>({setMimeType:(mime:string)=>({value,mime})})},
+  });
+  vm.runInContext(readFileSync('gas/Code.js','utf8'),context);
+  const result=context.doGet({parameter:{key:'test-secret',action:'badges'}});
+  expect(JSON.parse(result.value).ok).toBe(true);expect(result.mime).toBe('application/json');expect(outbound).toContain('https://sheets.googleapis.com/v4/spreadsheets/sheet-id/values/');expect(outbound).not.toContain('test-secret');
 });
