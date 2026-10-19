@@ -3,7 +3,7 @@ import { it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { BadgeProvider } from "../../src/data/BadgeProvider";
+import { AuthProvider } from "../../src/auth/AuthProvider";
 import BadgesPage from "../../src/pages/BadgesPage";
 import { defs } from "../fixtures/badges";
 afterEach(() => {
@@ -13,18 +13,18 @@ afterEach(() => {
 const view = () =>
   render(
     <MemoryRouter>
-      <BadgeProvider>
+      <AuthProvider>
         <BadgesPage />
-      </BadgeProvider>
+      </AuthProvider>
     </MemoryRouter>,
   );
 it("단계 필터를 바꾸면 해당 단계의 기본 설명으로 바꾼다", async () => {
-  vi.stubGlobal("fetch", async () => Response.json({ ok: true, data: defs }));
+  vi.stubGlobal("fetch", async () =>
+    Response.json({ ok: true, data: { definitions: defs, me: null } }),
+  );
   view();
   await screen.findByRole("region", { name: "AI디지털 입문자 상세 설명" });
-  await userEvent.click(
-    screen.getByRole("button", { name: "전문가" }),
-  );
+  await userEvent.click(screen.getByRole("button", { name: "전문가" }));
   expect(
     screen.getByRole("region", { name: "에듀테크 전문가 상세 설명" }),
   ).toBeVisible();
@@ -34,21 +34,19 @@ it("단계 필터를 바꾸면 해당 단계의 기본 설명으로 바꾼다", 
   await userEvent.click(
     screen.getByRole("button", { name: "현장코칭 전문가 상세 보기" }),
   );
-  await userEvent.click(
-    screen.getByRole("button", { name: "마스터" }),
-  );
+  await userEvent.click(screen.getByRole("button", { name: "마스터" }));
   expect(
     screen.getByRole("region", { name: "역량 마스터 상세 설명" }),
   ).toBeVisible();
-  await userEvent.click(
-    screen.getByRole("button", { name: "전체" }),
-  );
+  await userEvent.click(screen.getByRole("button", { name: "전체" }));
   expect(
     screen.getByRole("region", { name: "AI디지털 입문자 상세 설명" }),
   ).toBeVisible();
 });
 it("7종 필터와 선택한 배지의 실제 설명·기준을 표시한다", async () => {
-  vi.stubGlobal("fetch", async () => Response.json({ ok: true, data: defs }));
+  vi.stubGlobal("fetch", async () =>
+    Response.json({ ok: true, data: { definitions: defs, me: null } }),
+  );
   view();
   expect(
     await screen.findAllByRole("button", { name: /상세 보기$/ }),
@@ -87,7 +85,7 @@ it("연결 오류를 숨기지 않고 재시도로 시트 데이터를 불러온
           },
           { status: 503 },
         )
-      : Response.json({ ok: true, data: defs }),
+      : Response.json({ ok: true, data: { definitions: defs, me: null } }),
   );
   view();
   expect(await screen.findByRole("alert")).toHaveTextContent("연결을 확인");

@@ -32,7 +32,10 @@ export default function Roadmap({
         <div className="roadmap-stage beginner">
           <span className="pill green">1단계</span>
           <BadgeImage badgeId="beginner" size={120} />
-          <b>AI디지털 입문자</b>
+          <b>
+            {definitions.find((b) => b.id === "beginner")?.name ||
+              "AI디지털 입문자"}
+          </b>
           {progress ? (
             <span className={`pill ${earned("beginner") ? "green" : "gray"}`}>
               {earned("beginner") ? "획득" : "미획득"}
@@ -78,7 +81,9 @@ export default function Roadmap({
         <div className="roadmap-stage master">
           <span className="pill gold">3단계</span>
           <BadgeImage badgeId="master" size={120} />
-          <b>역량 마스터</b>
+          <b>
+            {definitions.find((b) => b.id === "master")?.name || "역량 마스터"}
+          </b>
           {progress ? (
             <span
               className={`pill ${progress.masterState === "awarded" ? "gold" : progress.masterState === "eligible" ? "purple" : "gray"}`}

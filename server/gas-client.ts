@@ -24,13 +24,12 @@ export async function callGas(
       "데이터 연결을 준비하고 있습니다. 잠시 후 다시 시도해 주세요.",
     );
   const url = new URL(deps.gasUrl);
-  url.search = new URLSearchParams({
-    ...params,
-    key: deps.gasSecret,
-  }).toString();
   let response: Response;
   try {
     response = await (deps.fetcher || fetch)(url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ...params, key: deps.gasSecret }),
       redirect: "follow",
       signal: AbortSignal.timeout(20000),
     });

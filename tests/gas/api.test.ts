@@ -9,6 +9,24 @@ const login = {
   name: "테스트교원01",
 };
 describe("GAS 인증과 데이터 경계", () => {
+  it("페이지 요청 하나가 최신 배지 정의와 개인 현황을 함께 반환한다", () => {
+    const r = runtime();
+    const token = r.call(login).data.token;
+    r.tables["배지소개"][0]["취득기준"] = "변경된 기준\n두 번째 줄";
+    const result = r.call({ action: "page", token });
+    expect(result.ok).toBe(true);
+    expect(result.data.definitions[0].criteria).toBe("변경된 기준\n두 번째 줄");
+    expect(result.data.me.collections).toHaveLength(7);
+    expect(r.call({ action: "page" }).data.me).toBeNull();
+    r.advance(14400000);
+    expect(r.call({ action: "page", token }).data.me).toBeNull();
+  });
+  it("로그인 응답에 배지 정의와 수집현황을 포함해 후속 조회를 생략한다", () => {
+    const result = runtime().call(login);
+    expect(result.data.definitions).toHaveLength(7);
+    expect(result.data.collections).toHaveLength(7);
+    expect(result.data.sessionExpiresAt).toBeGreaterThan(0);
+  });
   it("앞자리 0과 공백을 보존해 본인만 로그인한다", () => {
     const r = runtime();
     const result = r.call({
@@ -69,9 +87,14 @@ describe("GAS 인증과 데이터 경계", () => {
     expect(r.call(login).error.code).toBe("DATA_ERROR");
   });
 });
-it.each(["badges", "me"])(
-  "실제 doGet 어댑터가 읽기 전용 Sheets API로 %s JSON을 반환한다",
-  (action) => {
+it.each([
+  ["doGet", "badges"],
+  ["doGet", "me"],
+  ["doPost", "page"],
+  ["doPost", "me"],
+])(
+  "실제 %s 어댑터가 읽기 전용 Sheets API로 %s JSON을 반환한다",
+  (method, action) => {
     const fixture = runtime();
     fixture.tables["배지별 수집현황"] = seed.collections.map((row) =>
       Object.fromEntries(headers.collections.map((h, i) => [h, row[i]])),
@@ -122,9 +145,11 @@ it.each(["badges", "me"])(
       },
     });
     vm.runInContext(readFileSync("gas/Code.js", "utf8"), context);
-    const result = context.doGet({
-      parameter: { key: "test-secret", action, token: "a".repeat(64) },
-    });
+    const params = { key: "test-secret", action, token: "a".repeat(64) };
+    const result =
+      method === "doGet"
+        ? context.doGet({ parameter: params })
+        : context.doPost({ postData: { contents: JSON.stringify(params) } });
     expect(JSON.parse(result.value).ok).toBe(true);
     if (action === "me") {
       const me = JSON.parse(result.value).data;

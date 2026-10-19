@@ -14,12 +14,14 @@ async function call(action, params = {}) {
   let response;
   if (gas) {
     const url = new URL(process.env.GAS_WEB_APP_URL);
-    url.search = new URLSearchParams({
-      action,
-      key: process.env.GAS_SHARED_SECRET,
-      ...params,
-    }).toString();
     response = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        action,
+        key: process.env.GAS_SHARED_SECRET,
+        ...params,
+      }),
       redirect: "follow",
       signal: AbortSignal.timeout(30000),
     });

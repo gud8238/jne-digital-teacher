@@ -4,7 +4,6 @@ import { render, screen, cleanup, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { AuthProvider } from "../../src/auth/AuthProvider";
-import { BadgeProvider } from "../../src/data/BadgeProvider";
 import MyBadgesPage from "../../src/pages/MyBadgesPage";
 import GuidePage from "../../src/pages/GuidePage";
 import { defs, me, collection } from "../fixtures/badges";
@@ -13,15 +12,13 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 function view(page: "my" | "guide", data: any = me) {
-  vi.stubGlobal("fetch", async (url: string) =>
-    Response.json({ ok: true, data: url === "/api/badges" ? defs : data }),
+  vi.stubGlobal("fetch", async () =>
+    Response.json({ ok: true, data: { definitions: defs, me: data } }),
   );
   render(
     <MemoryRouter>
       <AuthProvider>
-        <BadgeProvider>
-          {page === "my" ? <MyBadgesPage /> : <GuidePage />}
-        </BadgeProvider>
+        {page === "my" ? <MyBadgesPage /> : <GuidePage />}
       </AuthProvider>
     </MemoryRouter>,
   );
@@ -30,18 +27,14 @@ it("배지함은 클릭한 배지만 설명을 열고 필터를 누르면 설명
   view("my");
   await screen.findByLabelText("전체 획득 배지");
   for (const filter of ["전체 (7)", "획득 (3)", "미획득 (4)", "마스터 (1)"]) {
-    await userEvent.click(
-      screen.getByRole("button", { name: filter }),
-    );
+    await userEvent.click(screen.getByRole("button", { name: filter }));
     expect(screen.queryByRole("region", { name: /상세 설명$/ })).toBeNull();
     const badge = within(
       screen.getByRole("group", { name: "배지 목록" }),
     ).getAllByRole("button")[0];
     await userEvent.click(badge);
     expect(screen.getByRole("region", { name: /상세 설명$/ })).toBeVisible();
-    await userEvent.click(
-      screen.getByRole("button", { name: filter }),
-    );
+    await userEvent.click(screen.getByRole("button", { name: filter }));
     expect(screen.queryByRole("region", { name: /상세 설명$/ })).toBeNull();
   }
 });

@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { AuthProvider, useAuth } from "../../src/auth/AuthProvider";
 import HomePage from "../../src/pages/HomePage";
-import { me } from "../fixtures/badges";
+import { me, defs } from "../fixtures/badges";
 let signedIn = false;
 let sent: any;
 beforeEach(() => {
@@ -18,7 +18,7 @@ beforeEach(() => {
         sent.neisNumber === "0000000001" && sent.name === "테스트교원01";
       return Response.json(
         signedIn
-          ? { ok: true, data: { teacher: me.teacher } }
+          ? { ok: true, data: { ...me, definitions: defs } }
           : {
               ok: false,
               error: {
@@ -33,15 +33,10 @@ beforeEach(() => {
       signedIn = false;
       return Response.json({ ok: true, data: { loggedOut: true } });
     }
-    return Response.json(
-      signedIn
-        ? { ok: true, data: me }
-        : {
-            ok: false,
-            error: { code: "UNAUTHORIZED", message: "로그인이 필요합니다." },
-          },
-      { status: signedIn ? 200 : 401 },
-    );
+    return Response.json({
+      ok: true,
+      data: { definitions: defs, me: signedIn ? me : null },
+    });
   });
 });
 afterEach(() => {
@@ -119,8 +114,11 @@ it("열어 둔 화면에서도 서버가 정한 만료 시각에 개인정보를
     Response.json({
       ok: true,
       data: {
-        ...me,
-        sessionExpiresAt: Date.now() + 1000,
+        definitions: defs,
+        me: {
+          ...me,
+          sessionExpiresAt: Date.now() + 1000,
+        },
       },
     }),
   );
@@ -136,19 +134,21 @@ it("열어 둔 화면에서도 서버가 정한 만료 시각에 개인정보를
   });
   expect(screen.getByText("미로그인", { selector: "output" })).toBeVisible();
 });
-it("다른 탭에서 세션이 사라진 뒤 돌아오면 다시 확인하고 개인정보를 지운다", async () => {
+it("다른 탭의 로그아웃 알림이 오면 추가 조회 없이 개인정보를 지운다", async () => {
   signedIn = true;
   view();
   await screen.findByText("테스트교원01", { selector: "output" });
   signedIn = false;
   await act(async () => {
-    window.dispatchEvent(new Event("focus"));
+    window.dispatchEvent(
+      new StorageEvent("storage", { key: "jne-badge-logout" }),
+    );
   });
   expect(screen.getByText("미로그인", { selector: "output" })).toBeVisible();
 });
 it("초기 세션 조회보다 빠른 로그인 실패 후에도 로딩을 끝낸다", async () => {
   vi.stubGlobal("fetch", async (url: string) =>
-    url === "/api/me"
+    url === "/api/page"
       ? new Promise<Response>(() => {})
       : Response.json(
           {

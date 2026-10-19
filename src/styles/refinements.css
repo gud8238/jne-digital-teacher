@@ -48,6 +48,10 @@
 .collection-card h3 {
   overflow-wrap: anywhere;
 }
+.detail-content > p,
+.recommendation-card p {
+  white-space: pre-line;
+}
 .collection-card p {
   flex-wrap: wrap;
   overflow-wrap: anywhere;

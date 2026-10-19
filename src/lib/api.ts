@@ -16,6 +16,7 @@ export async function apiRequest<T>(
     response = await fetch("/api/" + path, {
       ...init,
       credentials: "same-origin",
+      cache: "no-store",
       headers: { "content-type": "application/json", ...init?.headers },
       signal: AbortSignal.timeout(25000),
     });

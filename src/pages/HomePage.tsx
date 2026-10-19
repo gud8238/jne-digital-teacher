@@ -16,20 +16,20 @@ export default function HomePage() {
     setBusy(true);
     setError("");
     const values = new FormData(e.currentTarget);
+    const requested = location.state?.from;
+    const target =
+      typeof requested === "string" &&
+      requested.startsWith("/") &&
+      !requested.startsWith("//")
+        ? requested
+        : "/my-badges";
     try {
       await auth.login(
         String(values.get("neisNumber")),
         String(values.get("name")),
+        target,
       );
-      const target = location.state?.from;
-      navigate(
-        typeof target === "string" &&
-          target.startsWith("/") &&
-          !target.startsWith("//")
-          ? target
-          : "/my-badges",
-        { replace: true },
-      );
+      navigate(target, { replace: true });
     } catch (err) {
       setError((err as Error).message);
     } finally {

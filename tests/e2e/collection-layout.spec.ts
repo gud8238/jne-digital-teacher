@@ -3,20 +3,20 @@ import { defs, me, collection } from "../fixtures/badges";
 
 for (const scenario of ["beginner-earned", "master-earned"] as const) {
   test(`배지함 단계별 세로 배치와 같은 높이: ${scenario}`, async ({ page }) => {
-    await page.route("**/api/badges", (route) =>
-      route.fulfill({ json: { ok: true, data: defs } }),
-    );
-    await page.route("**/api/me", (route) =>
+    await page.route("**/api/page", (route) =>
       route.fulfill({
         json: {
           ok: true,
           data: {
-            ...me,
-            sessionExpiresAt: Date.now() + 14400000,
-            collections:
-              scenario === "master-earned"
-                ? collection(["master"])
-                : me.collections,
+            definitions: defs,
+            me: {
+              ...me,
+              sessionExpiresAt: Date.now() + 14400000,
+              collections:
+                scenario === "master-earned"
+                  ? collection(["master"])
+                  : me.collections,
+            },
           },
         },
       }),

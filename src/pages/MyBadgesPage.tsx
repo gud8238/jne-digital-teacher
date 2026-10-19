@@ -28,7 +28,6 @@ export default function MyBadgesPage() {
         <AsyncState
           error={auth.error || data.error}
           onRetry={() => {
-            void auth.refresh();
             void data.refresh();
           }}
         />

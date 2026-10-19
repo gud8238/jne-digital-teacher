@@ -1,4 +1,8 @@
-import { validateBadges, validateMe } from "../src/domain/badges";
+import {
+  validateBadges,
+  validateMe,
+  validatePageData,
+} from "../src/domain/badges";
 import { callGas, ServiceError, type ApiDependencies } from "./gas-client";
 import { readSession, sessionCookie } from "./session";
 export type { ApiDependencies } from "./gas-client";
@@ -24,6 +28,7 @@ export async function handleApi(
       login: "POST",
       me: "GET",
       logout: "POST",
+      page: "POST",
     };
     if (!methods[action])
       throw new ServiceError(
@@ -50,7 +55,21 @@ export async function handleApi(
         "현재 웹앱에서 다시 시도해 주세요.",
       );
     let data: unknown;
-    if (action === "badges") {
+    if (action === "page") {
+      const result = await callGas(
+        { action, token: readSession(request) || "" },
+        deps,
+      );
+      try {
+        data = validatePageData(result);
+      } catch {
+        throw new ServiceError(
+          502,
+          "DATA_ERROR",
+          "배지 데이터를 확인해 주세요.",
+        );
+      }
+    } else if (action === "badges") {
       try {
         data = validateBadges(await callGas({ action }, deps));
       } catch (e) {
@@ -103,14 +122,19 @@ export async function handleApi(
           "DATA_ERROR",
           "로그인 응답을 확인할 수 없습니다.",
         );
+      try {
+        data = {
+          ...validateMe(result),
+          definitions: validateBadges(result.definitions),
+        };
+      } catch {
+        throw new ServiceError(
+          502,
+          "DATA_ERROR",
+          "로그인 응답을 확인할 수 없습니다.",
+        );
+      }
       headers.set("set-cookie", sessionCookie(request, result.token));
-      data = {
-        teacher: {
-          id: result.teacher.id,
-          name: result.teacher.name,
-          school: result.teacher.school || null,
-        },
-      };
     } else {
       const token = readSession(request);
       if (!token && action !== "logout") {
@@ -147,8 +171,11 @@ export async function handleApi(
             "SERVICE_UNAVAILABLE",
             "데이터 연결을 확인해 주세요.",
           );
-    // A stale GET can finish after a new login; it must not erase the new cookie.
-    if (error.status === 401 && request.method === "POST")
+    // A stale page read can finish after a new login; never erase its cookie.
+    if (
+      error.status === 401 &&
+      new URL(request.url).pathname.endsWith("/login")
+    )
       headers.set("set-cookie", sessionCookie(request, "", true));
     return send(
       { ok: false, error: { code: error.code, message: error.message } },

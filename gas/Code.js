@@ -169,16 +169,42 @@ function getCollections(s, teacherId) {
     return { badgeId: r.badge_id, status: r["수집현황"], earnedAt: date };
   });
 }
+function readPersonal(s, token) {
+  if (!/^[a-f0-9]{64}$/.test(token || "")) apiFailure("UNAUTHORIZED");
+  var session = s.getSession(token);
+  if (!session || session.expiresAt <= s.now()) apiFailure("UNAUTHORIZED");
+  var teacher = teacherRows(s).find(function (r) {
+    return r.teacher_id === session.teacherId && r["활성여부"] === "사용";
+  });
+  if (!teacher) apiFailure("UNAUTHORIZED");
+  return {
+    teacher: publicTeacher(teacher),
+    collections: getCollections(s, teacher.teacher_id),
+    sessionExpiresAt: session.expiresAt,
+  };
+}
 function handleRequest(p, s) {
   try {
     if (!s.secret || p.key !== s.secret) apiFailure("UNAUTHORIZED");
     if (
-      ["badges", "login", "me", "logout"].indexOf(p.action) === -1 ||
+      ["badges", "login", "me", "logout", "page"].indexOf(p.action) === -1 ||
       p.teacher_id ||
       p.teacherId
     )
       apiFailure("BAD_REQUEST");
     if (p.action === "badges") return { ok: true, data: readDefinitions(s) };
+    if (p.action === "page") {
+      var definitions = readDefinitions(s);
+      var personal = null;
+      if (p.token) {
+        try {
+          personal = readPersonal(s, p.token);
+        } catch (e) {
+          if (e.apiCode !== "UNAUTHORIZED") throw e;
+        }
+      }
+      return { ok: true, data: { definitions: definitions, me: personal } };
+    }
     if (p.action === "login") {
       var neis = typeof p.neisNumber === "string" ? p.neisNumber.trim() : "";
       var name = typeof p.name === "string" ? p.name.trim() : "";
@@ -192,12 +218,24 @@ function handleRequest(p, s) {
         );
       });
       if (!row) apiFailure("UNAUTHORIZED");
+      var loginDefinitions = readDefinitions(s);
+      var collections = getCollections(s, row.teacher_id);
+      var expiresAt = s.now() + 14400000;
       var token = s.newToken();
       s.putSession(token, {
         teacherId: row.teacher_id,
-        expiresAt: s.now() + 14400000,
+        expiresAt: expiresAt,
       });
-      return { ok: true, data: { teacher: publicTeacher(row), token: token } };
+      return {
+        ok: true,
+        data: {
+          teacher: publicTeacher(row),
+          token: token,
+          definitions: loginDefinitions,
+          collections: collections,
+          sessionExpiresAt: expiresAt,
+        },
+      };
     }
     if (!/^[a-f0-9]{64}$/.test(p.token || "")) apiFailure("UNAUTHORIZED");
     var session = s.getSession(p.token);
@@ -206,18 +244,7 @@ function handleRequest(p, s) {
       s.removeSession(p.token);
       return { ok: true, data: { loggedOut: true } };
     }
-    var teacher = teacherRows(s).find(function (r) {
-      return r.teacher_id === session.teacherId && r["활성여부"] === "사용";
-    });
-    if (!teacher) apiFailure("UNAUTHORIZED");
-    return {
-      ok: true,
-      data: {
-        teacher: publicTeacher(teacher),
-        collections: getCollections(s, teacher.teacher_id),
-        sessionExpiresAt: session.expiresAt,
-      },
-    };
+    return { ok: true, data: readPersonal(s, p.token) };
   } catch (e) {
     var code = e.apiCode || "SERVICE_UNAVAILABLE";
     var messages = {
@@ -236,10 +263,10 @@ function handleRequest(p, s) {
     };
   }
 }
-function doGet(e) {
+function serveRequest(params) {
   var properties = PropertiesService.getScriptProperties();
   var cache = CacheService.getScriptCache();
-  var result = handleRequest((e && e.parameter) || {}, {
+  var result = handleRequest(params, {
     secret: properties.getProperty("API_SHARED_SECRET"),
     readTable: function (name) {
       var url =
@@ -316,5 +343,26 @@ function doGet(e) {
   });
   return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(
     ContentService.MimeType.JSON,
+  );
+}
+function doGet(e) {
+  return serveRequest((e && e.parameter) || {});
+}
+function doPost(e) {
+  var params;
+  try {
+    params = JSON.parse(e.postData.contents);
+  } catch (_) {
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        ok: false,
+        error: { code: "BAD_REQUEST", message: "요청 정보를 확인해 주세요." },
+      }),
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+  return serveRequest(
+    params && typeof params === "object" && !Array.isArray(params)
+      ? params
+      : {},
   );
 }

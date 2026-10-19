@@ -2,14 +2,14 @@ import { test, expect } from "@playwright/test";
 import { defs, me } from "../fixtures/badges";
 
 test.beforeEach(async ({ page }) => {
-  await page.route("**/api/badges", (route) =>
-    route.fulfill({ json: { ok: true, data: defs } }),
-  );
-  await page.route("**/api/me", (route) =>
+  await page.route("**/api/page", (route) =>
     route.fulfill({
       json: {
         ok: true,
-        data: { ...me, sessionExpiresAt: Date.now() + 14400000 },
+        data: {
+          definitions: defs,
+          me: { ...me, sessionExpiresAt: Date.now() + 14400000 },
+        },
       },
     }),
   );

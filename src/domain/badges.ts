@@ -30,6 +30,14 @@ export type Me = {
   collections: BadgeCollection[];
   sessionExpiresAt: number;
 };
+export type PageData = { definitions: BadgeDefinition[]; me: Me | null };
+export function validatePageData(value: unknown): PageData {
+  const page = record(value);
+  return {
+    definitions: validateBadges(page.definitions),
+    me: page.me === null ? null : validateMe(page.me),
+  };
+}
 export type Progress = {
   earnedCount: number;
   expertCount: number;

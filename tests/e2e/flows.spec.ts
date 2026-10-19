@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { me } from "../fixtures/badges";
+import { me, defs } from "../fixtures/badges";
 for (const width of [360, 390, 768, 1440]) {
   test(`실제 시트 로그인과 네 화면 ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 1000 });
@@ -107,15 +107,18 @@ test("키보드 로그인·보호 경로 복귀와 큰 글꼴", async ({ page })
   });
 });
 test("긴 이름을 PC와 모바일에서 가로 넘침 없이 표시한다", async ({ page }) => {
-  await page.route("**/api/me", (route) =>
+  await page.route("**/api/page", (route) =>
     route.fulfill({
       json: {
         ok: true,
         data: {
-          ...me,
-          teacher: {
-            ...me.teacher,
-            name: "아주긴이름을가진전남광주통합특별시테스트교원선생님",
+          definitions: defs,
+          me: {
+            ...me,
+            teacher: {
+              ...me.teacher,
+              name: "아주긴이름을가진전남광주통합특별시테스트교원선생님",
+            },
           },
         },
       },

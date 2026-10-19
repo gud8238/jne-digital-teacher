@@ -8,7 +8,9 @@
 
 ## 실행
 
-Node 24에서 `npm ci`를 실행하고 `.env.example`을 `.env`로 복사해 서버 설정을 입력합니다. `netlify dev`로 FE와 중계 API를 함께 실행합니다. DB는 Google Sheets, API는 GAS doGet이며 설정 절차는 [운영 안내](docs/operations.md)를 참고하세요.
+Node 24에서 `npm ci`를 실행하고 `.env.example`을 `.env`로 복사해 서버 설정을 입력합니다. `netlify dev`로 FE와 중계 API를 함께 실행합니다. DB는 Google Sheets이며, 페이지별 POST 조회를 Netlify 중계 API와 GAS doPost로 처리합니다. 기존 doGet도 호환용으로 유지합니다. 설정 절차는 [운영 안내](docs/operations.md)를 참고하세요.
+
+구글시트의 배지 설명·취득기준·준비안내·추천우선순위·표시순서는 다음 페이지 이동 또는 새로고침 시 반영합니다. 페이지마다 배지와 개인 현황을 POST 한 번으로 함께 조회하며, 필터·배지 선택·탭 복귀에는 추가 조회하지 않습니다. 로그인 응답을 착지 화면에서도 재사용해 중복 조회를 생략합니다.
 
 ## 테스트
 

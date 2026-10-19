@@ -25,10 +25,8 @@ function setup() {
     deps: {
       gasUrl: "https://script.google.com/macros/s/test/exec",
       gasSecret: "test-secret",
-      fetcher: async (url: any) =>
-        Response.json(
-          gas.call(Object.fromEntries(new URL(String(url)).searchParams)),
-        ),
+      fetcher: async (_url: any, init?: RequestInit) =>
+        Response.json(gas.call(JSON.parse(String(init?.body)))),
     },
   };
 }
@@ -37,6 +35,38 @@ const login = JSON.stringify({
   name: "테스트교원01",
 });
 describe("브라우저 API 경계", () => {
+  it("만료 쿠키가 있어도 POST 한 번으로 공개 화면을 복원하며 새 쿠키를 지우지 않는다", async () => {
+    const { deps } = setup();
+    const original = deps.fetcher;
+    let calls = 0;
+    deps.fetcher = async (url, init) => {
+      calls++;
+      expect(init?.method).toBe("POST");
+      expect(String(url)).not.toContain("test-secret");
+      expect(JSON.parse(String(init?.body)).key).toBe("test-secret");
+      return original(url, init);
+    };
+    const response = await handleApi(
+      req("page", "POST", "{}", "jne_badge_session=" + "b".repeat(64)),
+      deps,
+    );
+    expect(response.status).toBe(200);
+    expect((await response.json()).data.me).toBeNull();
+    expect(response.headers.get("set-cookie")).toBeNull();
+    expect(calls).toBe(1);
+  });
+  it("페이지 POST 하나로 공개 배지와 선택적 개인 현황을 반환한다", async () => {
+    const { deps } = setup();
+    const response = await handleApi(
+      req("page", "POST", JSON.stringify({ path: "/badges" })),
+      deps,
+    );
+    expect(response.status).toBe(200);
+    const data = (await response.json()).data;
+    expect(data.definitions).toHaveLength(7);
+    expect(data.me).toBeNull();
+    expect(response.headers.get("set-cookie")).toBeNull();
+  });
   it.each([undefined, "jne_badge_session=" + "b".repeat(64)])(
     "실패한 이전 세션 조회가 새 로그인 쿠키를 지우지 않는다: %s",
     async (cookie) => {

@@ -42,7 +42,6 @@ export default function GuidePage() {
           loading={auth.loading || data.loading}
           error={auth.error || data.error}
           onRetry={() => {
-            void auth.refresh();
             void data.refresh();
           }}
         />
@@ -166,7 +165,7 @@ export default function GuidePage() {
                     ))
                   )}
                   <p className="recommendation-basis">
-                    미획득 배지와 기본 추천 순서에 따른 안내입니다.
+                    미획득 배지와 설정된 추천 우선순위에 따른 안내입니다.
                   </p>
                 </section>
               </div>
