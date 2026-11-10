@@ -12,12 +12,12 @@
 
 ## 실행
 
-- [ ] 원인 재현 및 MIME 별 HWPX 선택 회귀 검사 RED → 최소 수정 → GREEN. 지원 외 확장자·빈 파일·용량 초과와 서버 내용 검증 유지.
-- [ ] 문구 변경, 6종 UI와 마스터 제외·획득 제외 확인. GAS 경로도 전체 badgeId 검사.
-- [ ] 별도 문서 담당자가 artifacts/forms-v2에 네이티브 HWPX 6종 생성. 한글 열기·PDF 출력·XML·시각 검수. root는 코드·업로드 연동 담당.
-- [ ] Drive의 기존 professional 파일은 같은 ID로 갱신하고 나머지 5개를 서류양식 폴더에 추가. 중복 접두어 방지 및 API 다운로드 바이트 확인.
-- [ ] 단위·UI·제품 빌드와 실제 브라우저/Drive/Sheet 제출 확인. 검증 상태만 조건부 복원하고 실제 상태·날짜 보존.
-- [ ] 독립 검토 후 GitHub CLI push, Netlify CLI 배포, 운영 최종 검증 및 기록.
+- [x] 원인 재현 및 MIME 별 HWPX 선택 회귀 검사 RED → 최소 수정 → GREEN. 지원 외 확장자·빈 파일·용량 초과와 서버 내용 검증 유지.
+- [x] 문구 변경, 6종 UI와 마스터 제외·획득 제외 확인. GAS 경로도 전체 badgeId 검사.
+- [x] 별도 문서 담당자가 artifacts/forms-v2에 네이티브 HWPX 6종 생성. 한글 열기·PDF 출력·XML·시각 검수. root는 코드·업로드 연동 담당.
+- [x] Drive의 기존 professional 파일은 같은 ID로 갱신하고 나머지 5개를 서류양식 폴더에 추가. 중복 접두어 방지 및 API 다운로드 바이트 확인.
+- [x] 단위·UI·제품 빌드와 실제 브라우저/Drive/Sheet 제출 확인. 검증 상태만 조건부 복원하고 실제 상태·날짜 보존.
+- [x] 독립 검토 후 GitHub CLI push, Netlify CLI 배포, 운영 최종 검증 및 기록.
 
 ## 검토 초점
 
