@@ -115,14 +115,16 @@ export default function GuidePage() {
                           <b>{b.name}</b>
                           <span className="row-criteria">{b.criteria}</span>
                           <span
-                            className={`pill ${row.status === "획득" ? "green" : b.id === "master" && progress.masterState === "eligible" ? "gold" : "gray"}`}
+                            className={`pill ${row.status === "획득" ? "green" : row.status === "서류제출" ? "purple" : b.id === "master" && progress.masterState === "eligible" ? "gold" : "gray"}`}
                           >
                             {row.status === "획득"
                               ? "획득"
-                              : b.id === "master" &&
-                                  progress.masterState === "eligible"
-                                ? "조건 충족"
-                                : "미획득"}
+                              : row.status === "서류제출"
+                                ? "서류제출 · 심사대기"
+                                : b.id === "master" &&
+                                    progress.masterState === "eligible"
+                                  ? "조건 충족"
+                                  : "미획득"}
                           </span>
                           <Icon name="arrow" size={15} />
                         </button>

@@ -25,8 +25,8 @@ export default function HomePage() {
         : "/my-badges";
     try {
       await auth.login(
-        String(values.get("neisNumber")),
         String(values.get("name")),
+        String(values.get("trainingId")),
         target,
       );
       navigate(target, { replace: true });
@@ -65,16 +65,6 @@ export default function HomePage() {
             </>
           ) : form ? (
             <form onSubmit={(e) => void submit(e)} aria-label="교원 로그인">
-              <label htmlFor="neisNumber">나이스번호</label>
-              <input
-                id="neisNumber"
-                name="neisNumber"
-                autoComplete="username"
-                inputMode="text"
-                placeholder="나이스번호를 입력해 주세요"
-                required
-                maxLength={128}
-              />
               <label htmlFor="name">이름</label>
               <input
                 id="name"
@@ -83,6 +73,16 @@ export default function HomePage() {
                 placeholder="이름을 입력해 주세요"
                 required
                 maxLength={80}
+              />
+              <label htmlFor="trainingId">연수원 아이디</label>
+              <input
+                id="trainingId"
+                name="trainingId"
+                autoComplete="username"
+                inputMode="text"
+                placeholder="연수원 아이디를 입력해 주세요"
+                required
+                maxLength={128}
               />
               {error ? (
                 <p className="form-error" role="alert">

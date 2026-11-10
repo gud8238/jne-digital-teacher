@@ -13,13 +13,13 @@ const legacy = ids.map((id) => [
 it("연구·전문 순서를 맞추고 교원별 상태와 원래 취득일을 한 행에 보존한다", () => {
   expect(collectionHeaders.slice(0, 8)).toEqual([
     "teacher_id",
-    "AI디지털 입문자",
-    "에듀테크 전문가",
-    "수업연구 실천가",
-    "전문과정 이수자",
-    "강의 선도자",
-    "현장코칭 전문가",
-    "역량 마스터",
+    "AI 교육 입문자",
+    "AI 교육 활용 전문가",
+    "AI 교육 연구 실천가",
+    "AI 교육 수업 전문가",
+    "AI 교육 강의 전문가",
+    "AI 교육 코칭 전문가",
+    "AI 교육 역량 마스터",
   ]);
   const rows = pivotCollections([
     ...legacy,

@@ -21,7 +21,7 @@ function setup() {
   ];
   const token = r.call({
     action: "login",
-    neisNumber: "0000000001",
+    trainingId: "jne-test01",
     name: "테스트교원01",
   }).data.token;
   return { ...r, me: () => r.call({ action: "me", token }) };
@@ -48,6 +48,18 @@ it("새로 획득하고 취득일이 비어 있으면 임의의 날짜를 만들
   expect(
     r.me().data?.collections.find((b: any) => b.badgeId === "master").earnedAt,
   ).toBeNull();
+});
+it("이전·새 명칭의 열을 함께 읽고 제출은 날짜 없이 반환하며 마스터 제출은 거절한다", () => {
+  const r = setup(),
+    row = r.tables["배지별 수집현황"][0];
+  delete row["전문과정 이수자"];
+  row["AI 교육 수업 전문가"] = "서류제출";
+  row["AI 교육 수업 전문가 취득일"] = "2026-10-01";
+  expect(
+    r.me().data.collections.find((b: any) => b.badgeId === "professional"),
+  ).toEqual({ badgeId: "professional", status: "서류제출", earnedAt: null });
+  row["역량 마스터"] = "서류제출";
+  expect(r.me().error.code).toBe("DATA_ERROR");
 });
 it.each([
   "missingRow",

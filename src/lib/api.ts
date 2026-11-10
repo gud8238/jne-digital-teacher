@@ -18,7 +18,7 @@ export async function apiRequest<T>(
       credentials: "same-origin",
       cache: "no-store",
       headers: { "content-type": "application/json", ...init?.headers },
-      signal: AbortSignal.timeout(25000),
+      signal: init?.signal || AbortSignal.timeout(25000),
     });
   } catch {
     throw new ApiError(

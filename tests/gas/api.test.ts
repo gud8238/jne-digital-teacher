@@ -5,7 +5,7 @@ import vm from "node:vm";
 import { seed, headers } from "../../scripts/seed-data.mjs";
 const login = {
   action: "login",
-  neisNumber: "0000000001",
+  trainingId: "jne-test01",
   name: "테스트교원01",
 };
 describe("GAS 인증과 데이터 경계", () => {
@@ -31,7 +31,7 @@ describe("GAS 인증과 데이터 경계", () => {
     const r = runtime();
     const result = r.call({
       ...login,
-      neisNumber: " 0000000001 ",
+      trainingId: " jne-test01 ",
       name: " 테스트교원01 ",
     });
     expect(result.ok).toBe(true);
@@ -40,12 +40,12 @@ describe("GAS 인증과 데이터 경계", () => {
       name: "테스트교원01",
       school: "테스트학교",
     });
-    expect(r.call({ ...login, neisNumber: "1" }).error.code).toBe(
+    expect(r.call({ ...login, trainingId: "1" }).error.code).toBe(
       "UNAUTHORIZED",
     );
     expect(r.call({ ...login, name: "다른이름" }).ok).toBe(false);
     expect(
-      r.call({ ...login, neisNumber: "0000000002", name: "테스트교원02" }).ok,
+      r.call({ ...login, trainingId: "jne-test02", name: "테스트교원02" }).ok,
     ).toBe(false);
   });
   it("세션이 없거나 만료·로그아웃하면 개인조회할 수 없다", () => {
@@ -81,7 +81,7 @@ describe("GAS 인증과 데이터 경계", () => {
       expect(r.call({ action: "me", token }).error.code).toBe("DATA_ERROR");
     },
   );
-  it("중복 나이스번호가 있으면 임의 교원을 선택하지 않는다", () => {
+  it("중복 연수원 아이디가 있으면 임의 교원을 선택하지 않는다", () => {
     const r = runtime();
     r.tables["교원"].push({ ...r.tables["교원"][0], teacher_id: "duplicate" });
     expect(r.call(login).error.code).toBe("DATA_ERROR");

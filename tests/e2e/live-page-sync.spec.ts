@@ -41,12 +41,16 @@ test("실제 시트 텍스트·줄바꿈·추천순위가 운영 페이지에 �
   });
   const response = page.waitForResponse((r) => r.url().endsWith("/api/page"));
   await page.goto("/");
-  expect((await (await response).json()).data.definitions).toEqual(expected);
+  expect((await (await response).json()).data.definitions).toEqual(
+    expected.map((badge: Record<string, unknown>) =>
+      expect.objectContaining(badge),
+    ),
+  );
   await page
     .getByRole("button", { name: "이메일로 로그인", exact: true })
     .click();
-  await page.getByLabel("나이스번호").fill(account.neisNumber);
   await page.getByLabel("이름", { exact: true }).fill(account.name);
+  await page.getByLabel("연수원 아이디").fill(account.trainingId);
   await page.getByRole("button", { name: "로그인하기", exact: true }).click();
   await expect(page.getByLabel("전체 획득 배지")).toHaveText(
     `${account.earnedCount} / 7`,
@@ -56,7 +60,11 @@ test("실제 시트 텍스트·줄바꿈·추천순위가 운영 페이지에 �
     const response = page.waitForResponse((r) => r.url().endsWith("/api/page"));
     await page.locator(`a[href="${path}"]:visible`).first().click();
     const data = (await (await response).json()).data;
-    expect(data.definitions).toEqual(expected);
+    expect(data.definitions).toEqual(
+      expected.map((badge: Record<string, unknown>) =>
+        expect.objectContaining(badge),
+      ),
+    );
     if (path === "/guide") {
       const recommended = recommendBadges(
         data.definitions,

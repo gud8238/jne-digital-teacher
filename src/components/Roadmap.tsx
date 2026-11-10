@@ -34,11 +34,16 @@ export default function Roadmap({
           <BadgeImage badgeId="beginner" size={120} />
           <b>
             {definitions.find((b) => b.id === "beginner")?.name ||
-              "AI디지털 입문자"}
+              "AI 교육 입문자"}
           </b>
           {progress ? (
             <span className={`pill ${earned("beginner") ? "green" : "gray"}`}>
-              {earned("beginner") ? "획득" : "미획득"}
+              {earned("beginner")
+                ? "획득"
+                : collections?.find((r) => r.badgeId === "beginner")?.status ===
+                    "서류제출"
+                  ? "서류제출 · 심사대기"
+                  : "미획득"}
             </span>
           ) : (
             <p>배움의 첫걸음</p>
@@ -57,7 +62,12 @@ export default function Roadmap({
                   <span>{b.name}</span>
                   {progress ? (
                     <small className={earned(b.id) ? "earned" : "unearned"}>
-                      {earned(b.id) ? "획득" : "미획득"}
+                      {earned(b.id)
+                        ? "획득"
+                        : collections?.find((r) => r.badgeId === b.id)
+                              ?.status === "서류제출"
+                          ? "서류제출 · 심사대기"
+                          : "미획득"}
                     </small>
                   ) : null}
                 </div>

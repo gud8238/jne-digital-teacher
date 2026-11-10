@@ -1,23 +1,25 @@
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import { defs, collection } from "../fixtures/badges";
-export function runtime() {
+export function runtime(requireDocuments = true) {
   const context = vm.createContext({});
   vm.runInContext(readFileSync("gas/Code.js", "utf8"), context);
+  if (requireDocuments)
+    vm.runInContext(readFileSync("gas/Documents.js", "utf8"), context);
   let clock = Date.parse("2026-10-17T00:00:00Z");
   const sessions = new Map<string, any>();
   const tables: Record<string, any[]> = {
     교원: [
       {
         teacher_id: "test-01",
-        나이스번호: "0000000001",
+        "연수원 아이디": "jne-test01",
         이름: "테스트교원01",
         소속학교: "테스트학교",
         활성여부: "사용",
       },
       {
         teacher_id: "test-02",
-        나이스번호: "0000000002",
+        "연수원 아이디": "jne-test02",
         이름: "테스트교원02",
         소속학교: "",
         활성여부: "중지",
@@ -52,11 +54,12 @@ export function runtime() {
   };
   return {
     tables,
+    context,
     services,
     advance: (ms: number) => {
       clock += ms;
     },
-    call: (params: Record<string, string>) =>
+    call: (params: Record<string, any>) =>
       context.handleRequest({ key: "test-secret", ...params }, services),
   };
 }

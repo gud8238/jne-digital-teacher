@@ -7,6 +7,7 @@ import PageBanner from "../components/PageBanner";
 import ProgressSummary, { masterMessage } from "../components/ProgressSummary";
 import CollectionCard from "../components/CollectionCard";
 import BadgeDetail from "../components/BadgeDetail";
+import SubmissionPanel from "../components/SubmissionPanel";
 import AsyncState from "../components/AsyncState";
 import Icon from "../components/Icon";
 export default function MyBadgesPage() {
@@ -43,6 +44,9 @@ export default function MyBadgesPage() {
       (filter === "master" && b.stage === 3) ||
       (filter === "earned" &&
         me.collections.find((r) => r.badgeId === b.id)?.status === "획득") ||
+      (filter === "submitted" &&
+        me.collections.find((r) => r.badgeId === b.id)?.status ===
+          "서류제출") ||
       (filter === "locked" &&
         me.collections.find((r) => r.badgeId === b.id)?.status === "미획득"),
   );
@@ -50,7 +54,11 @@ export default function MyBadgesPage() {
   const filters = [
     ["all", `전체 (7)`],
     ["earned", `획득 (${progress.earnedCount})`],
-    ["locked", `미획득 (${7 - progress.earnedCount})`],
+    ["submitted", `서류제출 (${progress.submittedCount})`],
+    [
+      "locked",
+      `미획득 (${7 - progress.earnedCount - progress.submittedCount})`,
+    ],
     ["master", "마스터 (1)"],
   ];
   const stages = [
@@ -164,14 +172,26 @@ export default function MyBadgesPage() {
           ) : null}
         </div>
         {active ? (
-          <BadgeDetail
-            badge={active}
-            collection={me.collections.find((r) => r.badgeId === active.id)}
-            onClose={() => {
-              setSelected(null);
-              trigger.current?.focus();
-            }}
-          />
+          <div>
+            <BadgeDetail
+              badge={active}
+              collection={me.collections.find((r) => r.badgeId === active.id)}
+              onClose={() => {
+                setSelected(null);
+                trigger.current?.focus();
+              }}
+            />
+            {active.id !== "master" ? (
+              <SubmissionPanel
+                key={`${active.id}:${me.teacher.id}:${me.sessionExpiresAt}`}
+                badge={active}
+                collection={me.collections.find(
+                  (r) => r.badgeId === active.id,
+                )!}
+                onComplete={auth.updateMe}
+              />
+            ) : null}
+          </div>
         ) : null}
       </section>
       <div className="collection-next container">

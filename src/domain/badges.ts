@@ -18,10 +18,12 @@ export type BadgeDefinition = {
   recommendationPriority: number;
   criteriaStatus: string;
   displayOrder: number;
+  templateFileId?: string;
+  templateFileName?: string;
 };
 export type BadgeCollection = {
   badgeId: BadgeId;
-  status: "획득" | "미획득";
+  status: "획득" | "미획득" | "서류제출";
   earnedAt: string | null;
 };
 export type Teacher = { id: string; name: string; school: string | null };
@@ -40,6 +42,7 @@ export function validatePageData(value: unknown): PageData {
 }
 export type Progress = {
   earnedCount: number;
+  submittedCount: number;
   expertCount: number;
   overallPercent: number;
   expertPercent: number;
@@ -77,6 +80,26 @@ export function validateBadges(value: unknown): BadgeDefinition[] {
       !Number.isFinite(b.displayOrder)
     )
       fail();
+    const template: Pick<
+      BadgeDefinition,
+      "templateFileId" | "templateFileName"
+    > = {};
+    if (b.templateFileId !== undefined || b.templateFileName !== undefined) {
+      if (
+        badgeId === "master" ||
+        typeof b.templateFileId !== "string" ||
+        !/^[\w-]{10,150}$/.test(b.templateFileId) ||
+        typeof b.templateFileName !== "string" ||
+        !/\.hwpx$/i.test(b.templateFileName) ||
+        /[\\/]/.test(b.templateFileName) ||
+        Array.from(b.templateFileName as string).some(
+          (c) => c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127,
+        )
+      )
+        fail();
+      template.templateFileId = b.templateFileId;
+      template.templateFileName = b.templateFileName;
+    }
     return {
       id: badgeId,
       stage: expectedStage,
@@ -87,6 +110,7 @@ export function validateBadges(value: unknown): BadgeDefinition[] {
       recommendationPriority: b.recommendationPriority,
       criteriaStatus: text(b.criteriaStatus),
       displayOrder: b.displayOrder,
+      ...template,
     } as BadgeDefinition;
   });
   complete(result.map((b) => b.id));
@@ -97,7 +121,11 @@ export function validateCollections(value: unknown): BadgeCollection[] {
   const rows = value.map((v) => {
     const row = record(v);
     const badgeId = id(row.badgeId);
-    if (row.status !== "획득" && row.status !== "미획득") fail();
+    if (
+      !["획득", "미획득", "서류제출"].includes(row.status) ||
+      (badgeId === "master" && row.status === "서류제출")
+    )
+      fail();
     const date = row.earnedAt;
     if (
       date !== null &&
@@ -107,7 +135,7 @@ export function validateCollections(value: unknown): BadgeCollection[] {
         new Date(date).toISOString().slice(0, 10) !== date)
     )
       fail();
-    if (row.status === "미획득" && date !== null) fail();
+    if (row.status !== "획득" && date !== null) fail();
     return { badgeId, status: row.status, earnedAt: date } as BadgeCollection;
   });
   complete(rows.map((row) => row.badgeId));
@@ -143,6 +171,7 @@ export function calculateProgress(
   ).length;
   return {
     earnedCount: earned.size,
+    submittedCount: rows.filter((r) => r.status === "서류제출").length,
     expertCount,
     overallPercent: Math.round((earned.size / 7) * 100),
     expertPercent: Math.round((expertCount / 5) * 100),
@@ -158,13 +187,13 @@ export function recommendBadges(
   definitions: BadgeDefinition[],
   collections: BadgeCollection[],
 ): BadgeDefinition[] {
-  const earned = new Set(
+  const pendingOrEarned = new Set(
     validateCollections(collections)
-      .filter((r) => r.status === "획득")
+      .filter((r) => r.status !== "미획득")
       .map((r) => r.badgeId),
   );
   return validateBadges(definitions)
-    .filter((b) => b.stage === 2 && !earned.has(b.id))
+    .filter((b) => b.stage === 2 && !pendingOrEarned.has(b.id))
     .sort(
       (a, b) =>
         a.recommendationPriority - b.recommendationPriority ||

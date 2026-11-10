@@ -31,7 +31,7 @@ function setup() {
   };
 }
 const login = JSON.stringify({
-  neisNumber: "0000000001",
+  trainingId: "jne-test01",
   name: "테스트교원01",
 });
 describe("브라우저 API 경계", () => {

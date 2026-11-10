@@ -3,8 +3,8 @@ import { readFileSync } from "node:fs";
 const accounts = process.env.VERIFY_ACCOUNTS_FILE
   ? JSON.parse(readFileSync(process.env.VERIFY_ACCOUNTS_FILE, "utf8"))
   : [
-      { neisNumber: "0000000001", name: "테스트교원01", earnedCount: 3 },
-      { neisNumber: "0000000002", name: "테스트교원02", earnedCount: 0 },
+      { trainingId: "jne-test01", name: "테스트교원01", earnedCount: 3 },
+      { trainingId: "jne-test02", name: "테스트교원02", earnedCount: 0 },
     ];
 assert.ok(Array.isArray(accounts) && accounts.length >= 2);
 const target = process.argv[2] || "http://localhost:8888";
@@ -54,13 +54,13 @@ const badges = await call("badges");
 assert.equal(badges.ok, true, JSON.stringify(badges.error));
 assert.equal(badges.data.length, 7);
 const failed = await call("login", {
-  neisNumber: accounts[0].neisNumber,
+  trainingId: accounts[0].trainingId,
   name: "틀린이름",
 });
 assert.equal(failed.ok, false);
 for (const account of accounts) {
   const login = await call("login", {
-    neisNumber: account.neisNumber,
+    trainingId: account.trainingId,
     name: account.name,
   });
   assert.equal(login.ok, true, JSON.stringify(login.error));
@@ -71,7 +71,7 @@ for (const account of accounts) {
     me.data.collections.filter((r) => r.status === "획득").length,
     account.earnedCount,
   );
-  assert.equal("neisNumber" in me.data.teacher, false);
+  assert.equal("trainingId" in me.data.teacher, false);
   assert.equal(Number.isSafeInteger(me.data.sessionExpiresAt), true);
   assert.ok(me.data.sessionExpiresAt > Date.now());
   assert.ok(me.data.sessionExpiresAt <= Date.now() + 14400000);

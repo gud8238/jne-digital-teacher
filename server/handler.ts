@@ -5,6 +5,7 @@ import {
 } from "../src/domain/badges";
 import { callGas, ServiceError, type ApiDependencies } from "./gas-client";
 import { readSession, sessionCookie } from "./session";
+import { handleSubmission, templateResponse } from "./submissions";
 export type { ApiDependencies } from "./gas-client";
 export async function handleApi(
   request: Request,
@@ -29,6 +30,10 @@ export async function handleApi(
       me: "GET",
       logout: "POST",
       page: "POST",
+      template: "GET",
+      "submission-start": "POST",
+      "submission-chunk": "POST",
+      "submission-complete": "POST",
     };
     if (!methods[action])
       throw new ServiceError(
@@ -55,7 +60,10 @@ export async function handleApi(
         "현재 웹앱에서 다시 시도해 주세요.",
       );
     let data: unknown;
-    if (action === "page") {
+    if (action === "template") return await templateResponse(request, deps);
+    if (action.startsWith("submission-"))
+      data = await handleSubmission(request, action, deps);
+    else if (action === "page") {
       const result = await callGas(
         { action, token: readSession(request) || "" },
         deps,
@@ -88,26 +96,26 @@ export async function handleApi(
         throw new ServiceError(
           400,
           "BAD_REQUEST",
-          "나이스번호와 이름을 입력해 주세요.",
+          "이름과 연수원 아이디를 입력해 주세요.",
         );
       }
       if (
-        typeof input?.neisNumber !== "string" ||
+        typeof input?.trainingId !== "string" ||
         typeof input?.name !== "string" ||
-        !input.neisNumber.trim() ||
+        !input.trainingId.trim() ||
         !input.name.trim() ||
-        input.neisNumber.length > 128 ||
+        input.trainingId.length > 128 ||
         input.name.length > 80
       )
         throw new ServiceError(
           400,
           "BAD_REQUEST",
-          "나이스번호와 이름을 입력해 주세요.",
+          "이름과 연수원 아이디를 입력해 주세요.",
         );
       const result = await callGas(
         {
           action,
-          neisNumber: input.neisNumber.trim(),
+          trainingId: input.trainingId.trim(),
           name: input.name.trim(),
         },
         deps,

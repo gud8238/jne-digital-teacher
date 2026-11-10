@@ -15,7 +15,7 @@ beforeEach(() => {
     if (url === "/api/login") {
       sent = JSON.parse(String(init?.body));
       signedIn =
-        sent.neisNumber === "0000000001" && sent.name === "테스트교원01";
+        sent.trainingId === "0000000001" && sent.name === "테스트교원01";
       return Response.json(
         signedIn
           ? { ok: true, data: { ...me, definitions: defs } }
@@ -23,7 +23,7 @@ beforeEach(() => {
               ok: false,
               error: {
                 code: "UNAUTHORIZED",
-                message: "나이스번호와 이름을 확인해 주세요.",
+                message: "이름과 연수원 아이디을 확인해 주세요.",
               },
             },
         { status: signedIn ? 200 : 401 },
@@ -81,11 +81,11 @@ it("이메일 로그인 폼에서 앞자리 0을 보존하고 오류 후 재시�
   await userEvent.click(
     screen.getByRole("button", { name: "이메일로 로그인" }),
   );
-  await userEvent.type(screen.getByLabelText("나이스번호"), "0000000001");
+  await userEvent.type(screen.getByLabelText("연수원 아이디"), "0000000001");
   await userEvent.type(screen.getByLabelText("이름"), "다른이름");
   await userEvent.click(screen.getByRole("button", { name: "로그인하기" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
-    "나이스번호와 이름을 확인",
+    "이름과 연수원 아이디을 확인",
   );
   await userEvent.clear(screen.getByLabelText("이름"));
   await userEvent.type(screen.getByLabelText("이름"), "테스트교원01");
@@ -93,7 +93,7 @@ it("이메일 로그인 폼에서 앞자리 0을 보존하고 오류 후 재시�
   expect(
     await screen.findByText("테스트교원01", { selector: "output" }),
   ).toBeVisible();
-  expect(sent.neisNumber).toBe("0000000001");
+  expect(sent).toEqual({ name: "테스트교원01", trainingId: "0000000001" });
   await userEvent.click(
     screen.getByRole("button", { name: "테스트 로그아웃" }),
   );
@@ -155,7 +155,7 @@ it("초기 세션 조회보다 빠른 로그인 실패 후에도 로딩을 끝�
             ok: false,
             error: {
               code: "UNAUTHORIZED",
-              message: "나이스번호와 이름을 확인해 주세요.",
+              message: "이름과 연수원 아이디을 확인해 주세요.",
             },
           },
           { status: 401 },
@@ -165,7 +165,7 @@ it("초기 세션 조회보다 빠른 로그인 실패 후에도 로딩을 끝�
   await userEvent.click(
     screen.getByRole("button", { name: "이메일로 로그인" }),
   );
-  await userEvent.type(screen.getByLabelText("나이스번호"), "0000000001");
+  await userEvent.type(screen.getByLabelText("연수원 아이디"), "0000000001");
   await userEvent.type(screen.getByLabelText("이름"), "다른이름");
   await userEvent.click(screen.getByRole("button", { name: "로그인하기" }));
   await screen.findByRole("alert");

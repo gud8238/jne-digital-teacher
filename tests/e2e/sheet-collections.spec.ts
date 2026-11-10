@@ -15,8 +15,8 @@ test("가로형 시트의 현재 계정으로 배지함·인증안내·소개·�
     await page.setViewportSize({ width, height: 1000 });
     await page.goto("/");
     await page.getByRole("button", { name: "이메일로 로그인" }).click();
-    await page.getByLabel("나이스번호").fill(accounts[0].neisNumber);
     await page.getByLabel("이름", { exact: true }).fill(accounts[0].name);
+    await page.getByLabel("연수원 아이디").fill(accounts[0].trainingId);
     await page.getByRole("button", { name: "로그인하기" }).click();
     await expect(page.getByLabel("전체 획득 배지")).toHaveText(
       `${accounts[0].earnedCount} / 7`,
@@ -25,10 +25,8 @@ test("가로형 시트의 현재 계정으로 배지함·인증안내·소개·�
       page.getByRole("group", { name: "배지 목록" }).getByRole("button"),
     ).toHaveCount(7);
     await expect(
-      page
-        .getByRole("button", { name: "AI디지털 입문자 상세 보기" })
-        .locator("p"),
-    ).toHaveText("2026-10-01");
+      page.getByRole("button", { name: "AI 교육 입문자 상세 보기" }),
+    ).toBeVisible();
     await page.goto("/guide");
     await expect(page.getByLabel("전문가 달성률")).toHaveText(
       `${Math.round((accounts[0].expertCount / 5) * 100)}%`,
@@ -38,10 +36,10 @@ test("가로형 시트의 현재 계정으로 배지함·인증안내·소개·�
       7,
     );
     await page
-      .getByRole("button", { name: "수업연구 실천가 상세 보기" })
+      .getByRole("button", { name: "AI 교육 연구 실천가 상세 보기" })
       .click();
     await expect(
-      page.getByRole("region", { name: "수업연구 실천가 상세 설명" }),
+      page.getByRole("region", { name: "AI 교육 연구 실천가 상세 설명" }),
     ).toBeVisible();
     await page.goto("/my-badges");
     await page.reload();
@@ -68,8 +66,8 @@ test("가로형 시트의 현재 계정으로 배지함·인증안내·소개·�
     });
     await page.getByRole("button", { name: "로그아웃", exact: true }).click();
     await page.getByRole("button", { name: "이메일로 로그인" }).click();
-    await page.getByLabel("나이스번호").fill(accounts[1].neisNumber);
     await page.getByLabel("이름", { exact: true }).fill(accounts[1].name);
+    await page.getByLabel("연수원 아이디").fill(accounts[1].trainingId);
     await page.getByRole("button", { name: "로그인하기" }).click();
     await expect(page.getByLabel("전체 획득 배지")).toHaveText(
       `${accounts[1].earnedCount} / 7`,

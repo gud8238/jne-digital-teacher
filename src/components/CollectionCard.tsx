@@ -10,7 +10,8 @@ export default function CollectionCard({
   collection: BadgeCollection;
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }) {
-  const earned = collection.status === "획득";
+  const earned = collection.status === "획득",
+    submitted = collection.status === "서류제출";
   return (
     <button
       className={`collection-card ${earned ? "collected" : "locked"} stage-${badge.stage}`}
@@ -25,8 +26,10 @@ export default function CollectionCard({
       </div>
       <div className="collection-card-content">
         <h3>{badge.name}</h3>
-        <span className={`pill ${earned ? "green" : "gray"}`}>
-          {earned ? "획득 완료" : "미획득"}
+        <span
+          className={`pill ${earned ? "green" : submitted ? "purple" : "gray"}`}
+        >
+          {earned ? "획득 완료" : submitted ? "서류제출 · 심사대기" : "미획득"}
         </span>
         <p>
           {earned ? (
@@ -35,7 +38,7 @@ export default function CollectionCard({
               {collection.earnedAt || "취득일 미등록"}
             </>
           ) : (
-            <span>나의 다음 도전</span>
+            <span>{submitted ? "관리자 검토 중" : "나의 다음 도전"}</span>
           )}
         </p>
       </div>

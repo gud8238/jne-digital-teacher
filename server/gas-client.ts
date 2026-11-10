@@ -14,7 +14,7 @@ export class ServiceError extends Error {
   }
 }
 export async function callGas(
-  params: Record<string, string>,
+  params: Record<string, unknown>,
   deps: ApiDependencies,
 ): Promise<any> {
   if (!deps.gasUrl || !deps.gasSecret)
@@ -31,7 +31,12 @@ export async function callGas(
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ ...params, key: deps.gasSecret }),
       redirect: "follow",
-      signal: AbortSignal.timeout(20000),
+      signal: AbortSignal.timeout(
+        String(params.action).startsWith("submission-") ||
+          params.action === "admin-provision"
+          ? 45000
+          : 20000,
+      ),
     });
   } catch {
     throw new ServiceError(
@@ -61,17 +66,44 @@ export async function callGas(
     const status =
       code === "UNAUTHORIZED"
         ? 401
-        : code === "BAD_REQUEST"
+        : [
+              "BAD_REQUEST",
+              "INVALID_FILE",
+              "UPLOAD_OFFSET",
+              "UPLOAD_INCOMPLETE",
+            ].includes(code || "")
           ? 400
-          : code === "DATA_ERROR"
-            ? 502
-            : 503;
+          : code === "FORBIDDEN"
+            ? 403
+            : code === "NOT_FOUND"
+              ? 404
+              : code === "CONFLICT" || code === "BUSY"
+                ? 409
+                : code === "PAYLOAD_TOO_LARGE"
+                  ? 413
+                  : code === "DATA_ERROR"
+                    ? 502
+                    : 503;
     const message =
       code === "UNAUTHORIZED"
-        ? "나이스번호와 이름을 확인하거나 다시 로그인해 주세요."
-        : code === "DATA_ERROR"
-          ? "배지 데이터가 올바르지 않습니다. 관리자에게 확인해 주세요."
-          : "데이터를 불러오지 못했습니다. 다시 시도해 주세요.";
+        ? "이름과 연수원 아이디를 확인하거나 다시 로그인해 주세요."
+        : code === "FORBIDDEN"
+          ? "이 배지에는 서류를 제출할 수 없습니다."
+          : code === "NOT_FOUND"
+            ? "양식이 아직 준비되지 않았습니다."
+            : code === "CONFLICT" || code === "BUSY"
+              ? "처리 중입니다. 잠시 후 다시 시도해 주세요."
+              : code === "UPLOAD_INCOMPLETE"
+                ? "파일 업로드가 완료되지 않았습니다. 다시 제출해 주세요."
+                : code === "UPLOAD_OFFSET"
+                  ? "업로드 진행 상태를 확인한 뒤 다시 시도해 주세요."
+                  : code === "INVALID_FILE"
+                    ? "파일 형식을 확인해 주세요."
+                    : code === "PAYLOAD_TOO_LARGE"
+                      ? "파일은 20MB 이하로 제출해 주세요."
+                      : code === "DATA_ERROR"
+                        ? "배지 데이터가 올바르지 않습니다. 관리자에게 확인해 주세요."
+                        : "데이터를 불러오지 못했습니다. 다시 시도해 주세요.";
     throw new ServiceError(status, code || "SERVICE_UNAVAILABLE", message);
   }
   return result.data;

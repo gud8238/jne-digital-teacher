@@ -49,9 +49,11 @@ export default function BadgeDetail({
           <span>{badge.criteriaStatus}</span>
           {collection ? (
             <span
-              className={`pill ${collection.status === "획득" ? "green" : "gray"}`}
+              className={`pill ${collection.status === "획득" ? "green" : collection.status === "서류제출" ? "purple" : "gray"}`}
             >
-              {collection.status}
+              {collection.status === "서류제출"
+                ? "서류제출 · 심사대기"
+                : collection.status}
               {collection.status === "획득"
                 ? ` · ${collection.earnedAt || "취득일 미등록"}`
                 : ""}

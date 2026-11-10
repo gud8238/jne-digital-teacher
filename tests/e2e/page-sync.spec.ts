@@ -23,6 +23,10 @@ for (const width of [390, 1440]) {
       expect(route.request().method()).toBe("POST");
       const personal = { ...me, sessionExpiresAt: Date.now() + 14400000 };
       if (action === "login") {
+        expect(route.request().postDataJSON()).toEqual({
+          name: "테스트교원01",
+          trainingId: "jne-test01",
+        });
         signedIn = true;
         await route.fulfill({
           json: { ok: true, data: { ...personal, definitions: definitions() } },
@@ -44,8 +48,8 @@ for (const width of [390, 1440]) {
     await page
       .getByRole("button", { name: "이메일로 로그인", exact: true })
       .click();
-    await page.getByLabel("나이스번호").fill("0000000001");
     await page.getByLabel("이름", { exact: true }).fill("테스트교원01");
+    await page.getByLabel("연수원 아이디").fill("jne-test01");
     await page.getByRole("button", { name: "로그인하기", exact: true }).click();
     await expect(page.getByLabel("전체 획득 배지")).toHaveText("3 / 7");
     expect(counts).toEqual({ page: 1, login: 1 });

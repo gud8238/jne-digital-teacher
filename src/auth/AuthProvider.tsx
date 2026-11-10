@@ -23,12 +23,13 @@ type Auth = {
   loading: boolean;
   error: string;
   login: (
-    neisNumber: string,
     name: string,
+    trainingId: string,
     destination?: string,
   ) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
+  updateMe: (value: Me) => void;
 };
 const AuthContext = createContext<Auth | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -121,8 +122,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [me, clearPersonal]);
   async function login(
-    neisNumber: string,
     name: string,
+    trainingId: string,
     destination = "/my-badges",
   ) {
     const current = ++epoch.current;
@@ -133,7 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const result = await apiRequest<Me & { definitions: BadgeDefinition[] }>(
         "login",
-        { method: "POST", body: JSON.stringify({ neisNumber, name }) },
+        { method: "POST", body: JSON.stringify({ name, trainingId }) },
       );
       const personal = validateMe(result),
         badges = validateBadges(result.definitions);
@@ -163,6 +164,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       /* Storage can be disabled. */
     }
   }
+  const updateMe = useCallback((value: Me) => {
+    const verified = validateMe(value);
+    epoch.current++;
+    pending.current.clear();
+    setMe((current) =>
+      current &&
+      current.teacher.id === verified.teacher.id &&
+      current.sessionExpiresAt === verified.sessionExpiresAt
+        ? verified
+        : current,
+    );
+  }, []);
   return (
     <AuthContext.Provider
       value={{
@@ -173,6 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         refresh,
+        updateMe,
       }}
     >
       {children}

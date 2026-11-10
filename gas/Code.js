@@ -7,6 +7,15 @@ var BADGE_IDS = [
   "coaching",
   "master",
 ];
+var COLLECTION_ALIASES = {
+  beginner: "AI 교육 입문자",
+  edtech: "AI 교육 활용 전문가",
+  professional: "AI 교육 수업 전문가",
+  research: "AI 교육 연구 실천가",
+  lecturer: "AI 교육 강의 전문가",
+  coaching: "AI 교육 코칭 전문가",
+  master: "AI 교육 역량 마스터",
+};
 var COLLECTION_COLUMNS = [
   ["beginner", "AI디지털 입문자"],
   ["edtech", "에듀테크 전문가"],
@@ -64,6 +73,21 @@ function readDefinitions(s) {
         Number.isFinite(b.displayOrder),
     );
   });
+  if (s.documents) {
+    try {
+      s.documents.templates().forEach(function (f) {
+        var def = defs.find(function (b) {
+          return b.id === f.badgeId;
+        });
+        if (def) {
+          def.templateFileId = f.id;
+          def.templateFileName = f.name;
+        }
+      });
+    } catch (_) {
+      /* Optional templates must not prevent login or snapshots. */
+    }
+  }
   return defs.sort(function (a, b) {
     return a.displayOrder - b.displayOrder;
   });
@@ -80,14 +104,14 @@ function teacherRows(s) {
   assertData(
     new Set(
       rows.map(function (r) {
-        return r["나이스번호"];
+        return r["연수원 아이디"];
       }),
     ).size === rows.length,
   );
   rows.forEach(function (r) {
     assertData(
       r.teacher_id &&
-        r["나이스번호"] &&
+        r["연수원 아이디"] &&
         r["이름"] &&
         ["사용", "중지"].indexOf(r["활성여부"]) !== -1,
     );
@@ -105,7 +129,7 @@ function getCollections(s, teacherId) {
   var table = s.readTable("배지별 수집현황");
   if (
     table.some(function (r) {
-      return "AI디지털 입문자" in r;
+      return "AI디지털 입문자" in r || "AI 교육 입문자" in r;
     })
   ) {
     assertData(
@@ -129,8 +153,15 @@ function getCollections(s, teacherId) {
       var name = COLLECTION_COLUMNS.find(function (c) {
         return c[0] === badgeId;
       })[1];
+      if (COLLECTION_ALIASES[badgeId] in wide)
+        name = COLLECTION_ALIASES[badgeId];
       var status = wide[name];
-      assertData(["획득", "미획득"].indexOf(status) !== -1);
+      assertData(
+        (badgeId === "master"
+          ? ["획득", "미획득"]
+          : ["획득", "미획득", "서류제출"]
+        ).indexOf(status) !== -1,
+      );
       var date = status === "획득" ? wide[name + " 취득일"] || null : null;
       if (date)
         assertData(
@@ -156,7 +187,10 @@ function getCollections(s, teacherId) {
   return rows.map(function (r) {
     assertData(
       BADGE_IDS.indexOf(r.badge_id) !== -1 &&
-        ["획득", "미획득"].indexOf(r["수집현황"]) !== -1,
+        (r.badge_id === "master"
+          ? ["획득", "미획득"]
+          : ["획득", "미획득", "서류제출"]
+        ).indexOf(r["수집현황"]) !== -1,
     );
     var date = r["취득일"] || null;
     if (date)
@@ -165,7 +199,7 @@ function getCollections(s, teacherId) {
           Number.isFinite(Date.parse(date)) &&
           new Date(date).toISOString().slice(0, 10) === date,
       );
-    assertData(r["수집현황"] !== "미획득" || date === null);
+    assertData(r["수집현황"] === "획득" || date === null);
     return { badgeId: r.badge_id, status: r["수집현황"], earnedAt: date };
   });
 }
@@ -187,11 +221,32 @@ function handleRequest(p, s) {
   try {
     if (!s.secret || p.key !== s.secret) apiFailure("UNAUTHORIZED");
     if (
-      ["badges", "login", "me", "logout", "page"].indexOf(p.action) === -1 ||
+      [
+        "badges",
+        "login",
+        "me",
+        "logout",
+        "page",
+        "template",
+        "submission-start",
+        "submission-chunk",
+        "submission-complete",
+        "admin-provision",
+      ].indexOf(p.action) === -1 ||
       p.teacher_id ||
       p.teacherId
     )
       apiFailure("BAD_REQUEST");
+    if (
+      [
+        "template",
+        "submission-start",
+        "submission-chunk",
+        "submission-complete",
+        "admin-provision",
+      ].indexOf(p.action) !== -1
+    )
+      return { ok: true, data: handleDocumentRequest(p, s) };
     if (p.action === "badges") return { ok: true, data: readDefinitions(s) };
     if (p.action === "page") {
       var definitions = readDefinitions(s);
@@ -206,13 +261,13 @@ function handleRequest(p, s) {
       return { ok: true, data: { definitions: definitions, me: personal } };
     }
     if (p.action === "login") {
-      var neis = typeof p.neisNumber === "string" ? p.neisNumber.trim() : "";
+      var neis = typeof p.trainingId === "string" ? p.trainingId.trim() : "";
       var name = typeof p.name === "string" ? p.name.trim() : "";
       if (!neis || !name || neis.length > 128 || name.length > 80)
         apiFailure("BAD_REQUEST");
       var row = teacherRows(s).find(function (r) {
         return (
-          r["나이스번호"] === neis &&
+          r["연수원 아이디"] === neis &&
           r["이름"] === name &&
           r["활성여부"] === "사용"
         );
@@ -248,9 +303,10 @@ function handleRequest(p, s) {
   } catch (e) {
     var code = e.apiCode || "SERVICE_UNAVAILABLE";
     var messages = {
-      UNAUTHORIZED: "나이스번호와 이름을 확인하거나 다시 로그인해 주세요.",
+      UNAUTHORIZED: "연수원 아이디와 이름을 확인하거나 다시 로그인해 주세요.",
       BAD_REQUEST: "요청 정보를 확인해 주세요.",
       DATA_ERROR: "배지 데이터가 올바르지 않습니다. 관리자에게 확인해 주세요.",
+      NOT_FOUND: "아직 준비된 양식이 없습니다.",
       SERVICE_UNAVAILABLE:
         "데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
     };
@@ -268,6 +324,10 @@ function serveRequest(params) {
   var cache = CacheService.getScriptCache();
   var result = handleRequest(params, {
     secret: properties.getProperty("API_SHARED_SECRET"),
+    documents:
+      typeof documentServices === "function"
+        ? documentServices(properties)
+        : null,
     readTable: function (name) {
       var url =
         "https://sheets.googleapis.com/v4/spreadsheets/" +
@@ -284,7 +344,7 @@ function serveRequest(params) {
       var values = JSON.parse(response.getContentText()).values || [];
       var headers = values.shift() || [];
       var expected = {
-        교원: ["teacher_id", "나이스번호", "이름", "소속학교", "활성여부"],
+        교원: ["teacher_id", "이름", "연수원 아이디", "소속학교", "활성여부"],
         배지소개: [
           "badge_id",
           "단계",
@@ -301,7 +361,9 @@ function serveRequest(params) {
             ? ["teacher_id", "badge_id", "수집현황", "취득일"]
             : ["teacher_id"].concat(
                 COLLECTION_COLUMNS.map(function (c) {
-                  return c[1];
+                  return headers.indexOf(COLLECTION_ALIASES[c[0]]) !== -1
+                    ? COLLECTION_ALIASES[c[0]]
+                    : c[1];
                 }),
               ),
       }[name];
@@ -325,14 +387,14 @@ function serveRequest(params) {
         });
     },
     getSession: function (token) {
-      var value = cache.get("session:" + token);
+      var value = cache.get("session:v2:" + token);
       return value ? JSON.parse(value) : null;
     },
     putSession: function (token, value) {
-      cache.put("session:" + token, JSON.stringify(value), 14400);
+      cache.put("session:v2:" + token, JSON.stringify(value), 14400);
     },
     removeSession: function (token) {
-      cache.remove("session:" + token);
+      cache.remove("session:v2:" + token);
     },
     now: function () {
       return Date.now();

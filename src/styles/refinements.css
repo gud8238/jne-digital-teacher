@@ -75,3 +75,118 @@
     z-index: 1;
   }
 }
+
+.submission-panel {
+  margin: 16px 0 0;
+  padding: 26px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  border: 1px solid #dceaff;
+  border-radius: 18px;
+}
+.submission-panel h3 {
+  margin: 0 0 10px;
+  font-size: 19px;
+}
+.submission-panel p {
+  line-height: 1.65;
+}
+.submission-intro > p {
+  color: #677b99;
+  margin: 0 0 16px;
+}
+.submission-panel small {
+  display: block;
+  color: #677b99;
+  line-height: 1.6;
+  margin-top: 8px;
+}
+.submission-panel form {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.submission-panel label {
+  font-size: 14px;
+  font-weight: 700;
+}
+.submission-panel input[type="file"] {
+  max-width: 100%;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cfdded;
+  border-radius: 10px;
+  background: #f7faff;
+  font-size: 13px;
+}
+.submission-panel .button {
+  min-height: 42px;
+  white-space: normal;
+}
+.submission-panel button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.submission-panel .form-error,
+.submission-success {
+  grid-column: 1/-1;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.submission-panel .submission-filename {
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  margin: 0;
+  color: #506780;
+}
+.submission-panel .submission-pending {
+  padding: 12px;
+  color: #7051b1;
+  background: #f4efff;
+  border-radius: 10px;
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+.submission-progress {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+}
+.submission-progress progress {
+  width: 100%;
+  accent-color: var(--blue);
+}
+.submission-success,
+.submission-earned {
+  color: #00834b;
+}
+.collection-card .pill {
+  min-height: 25px;
+  line-height: 1.45;
+}
+.collection-card h3 {
+  min-height: 2.8em;
+}
+@media (max-width: 700px) {
+  .submission-panel {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 18px;
+    gap: 20px;
+  }
+  .submission-panel h3 {
+    font-size: 17px;
+  }
+  .submission-panel p {
+    font-size: 13px;
+  }
+  .submission-panel .button {
+    width: 100%;
+    font-size: 13px;
+  }
+  .collection-card .pill.purple {
+    color: #7051b1;
+  }
+}

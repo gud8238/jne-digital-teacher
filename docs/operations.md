@@ -1,53 +1,68 @@
 # 운영 안내
 
-## 데이터와 기준
+## 데이터와 로그인 (2026-11-10)
 
-### 시트 수정 반영 및 조회 횟수 (2026-10-19)
+Google Sheets의 `교원`, `배지소개`, `배지별 수집현황`, `서류제출 내역` 탭을 사용합니다. `교원` A:E열은 `teacher_id`, `이름`, `연수원 아이디`, `소속학교`, `활성여부`입니다. 이름과 연수원 아이디가 일치하고 활성여부가 `사용`인 교원만 로그인할 수 있습니다. API 입력 이름은 `name`, `trainingId`이며 이전 `neisNumber`는 사용하지 않습니다.
 
-배지소개 탭의 설명·취득기준·준비안내·추천우선순위·기준상태·표시순서·배지명은 다음 페이지 진입 또는 브라우저 새로고침 때 다시 읽습니다. 시트에 입력한 줄바꿈은 상세 설명과 추천 카드에 보존합니다. 추천우선순위는 숫자가 작을수록 먼저이며, 동률이면 표시순서가 작은 배지를 먼저 추천합니다. 이미 획득한 배지는 추천에서 제외합니다.
+실제 시트의 `jne-test01`~`jne-test04`는 시범용 임시 연수원 아이디입니다. 로그인 이름은 교원 B열의 현재 값을 사용합니다. 초기 seed의 합성 이름과 실제 시트의 이름은 다를 수 있습니다. `scripts/seed-data.mjs`는 초기 데이터 생성용이며 기존 운영 데이터를 덮어쓰는 용도로 실행하지 않습니다. 교원·배지의 기존 ID, 획득 상태, 취득일을 보존합니다.
 
-홈/로그인(`/`), 배지소개, 인증안내, 나의 배지함으로 경로가 바뀔 때 `/api/page` POST 한 번으로 배지 정의와 선택적 개인 현황을 함께 받습니다. Netlify는 GAS doPost를 한 번 호출하며, GAS 내부에서 필요한 시트 탭을 읽습니다. POST는 조회용이며 시트를 수정하지 않습니다. 동일 화면의 필터·배지 클릭·포커스/탭 복귀에는 조회하지 않습니다. 로그인 제출은 별도 POST 한 번이며, 응답에 전체 현황이 포함되어 직후 착지 화면에서는 다시 조회하지 않습니다. 명시적 로그아웃과 오류의 수동 재시도는 각각 별도 사용자 요청으로 처리합니다. 같은 경로의 진행 중 요청은 합치고, 완료 응답을 다음 방문까지 캐시하지 않습니다.
+배지별 수집현황은 교원당 한 행이며 A열 `teacher_id`가 교원 탭과 일치해야 합니다. B:H열의 순서는 아래와 같습니다. 배지명과 취득일 헤더를 함께 유지하고 `badge_id`는 변경하지 않습니다.
 
-페이지 이동 시 이미 표시된 내용을 유지하며 새 응답으로 교체합니다. 미로그인 상태에서 보호 페이지로 이동할 때는 해당 경로의 새 인증 결과를 받은 뒤 리다이렉트 여부를 결정합니다. 만료 시각에는 네트워크 요청 없이 개인 정보를 지우고, 다른 탭의 로그아웃도 로컬 알림으로 반영합니다. 관리자가 시트에서 계정을 중지한 경우 다음 페이지 조회 때 반영됩니다.
+| 열 | badge_id | 배지명 |
+| --- | --- | --- |
+| B | beginner | AI 교육 입문자 |
+| C | edtech | AI 교육 활용 전문가 |
+| D | research | AI 교육 연구 실천가 |
+| E | professional | AI 교육 수업 전문가 |
+| F | lecturer | AI 교육 강의 전문가 |
+| G | coaching | AI 교육 코칭 전문가 |
+| H | master | AI 교육 역량 마스터 |
 
-지정 구글시트의 `교원`, `배지소개`, `배지별 수집현황` 탭을 사용합니다. 열 이름은 `scripts/seed-data.mjs`의 headers를 따릅니다. 나이스번호는 텍스트로 입력해 앞자리 0을 보존합니다. 교원은 활성여부가 `사용`일 때만 로그인할 수 있습니다.
+B:G열은 `미획득`·`서류제출`·`획득`, H열은 `미획득`·`획득`만 사용합니다. I:O열은 같은 순서의 `배지명 취득일`이며 `YYYY-MM-DD` 또는 공란입니다. 획득 상태일 때만 날짜를 표시합니다. 획득으로 바꿀 때 새 취득일이 필요하면 함께 수정하며, 공란이면 `취득일 미등록`으로 표시합니다. 교원 행 누락·중복, 빈 상태, 획득 상태의 잘못된 날짜는 데이터 오류가 됩니다.
 
-배지별 수집현황은 **교원당 한 행**입니다. A열 `teacher_id`는 교원 탭의 ID와 같아야 합니다. B~H열은 차례로 `AI디지털 입문자`, `에듀테크 전문가`, `수업연구 실천가`, `전문과정 이수자`, `강의 선도자`, `현장코칭 전문가`, `역량 마스터`이며, 7개 칸 모두 드롭다운의 `획득` 또는 `미획득`을 선택합니다. 교원 행이 누락·중복되거나 상태가 비어 있으면 API는 데이터 오류를 반환합니다.
+획득 수와 전문가 3종 이상인 마스터 조건에는 `획득`만 포함합니다. `서류제출`은 심사 대기로 따로 표시하며 추천에서 제외합니다. 추천은 미획득 전문가 배지 중 추천우선순위가 작은 순서이고, 동률이면 표시순서가 작은 배지를 먼저 선택합니다. 마스터 조건 충족과 실제 H열 획득 처리는 별개입니다.
 
-I~O열은 같은 배지 순서의 취득일이며 `YYYY-MM-DD` 또는 공란입니다. 평소 접어두며 열 위의 `+`로 펼칠 수 있습니다. `미획득` 상태에서는 날짜를 웹앱에 보내지 않습니다. `획득`으로 되돌리면 보존한 날짜가 다시 표시되므로 새 취득일이 필요하면 함께 수정합니다. 날짜 없이 획득으로 바꾸면 `취득일 미등록`으로 표시하며 현재 날짜를 임의로 만들지 않습니다.
+## 조회와 제출
 
-배지소개의 `badge_id`는 이미지, 필터, 진척 계산, API 데이터 매핑을 위한 고정 식별자이므로 유지합니다. 배지명만으로 식별하면 이름 수정 시 연결이 끊길 수 있습니다. 에듀테크의 실제 내부 ID는 `edtech`입니다. GAS가 가로형 행을 기존 API의 7개 배지 배열로 변환하므로 FE 계약은 같습니다. GAS의 이전 세로형 읽기는 전환·복원 호환용으로 유지합니다.
+홈/로그인(`/`), 배지소개, 인증안내, 나의 배지함으로 경로가 바뀌거나 새로고침하면 `/api/page` POST 한 번으로 배지 정의와 개인 현황을 함께 받습니다. Netlify는 GAS doPost를 한 번 호출하고 GAS 내부에서 필요한 탭을 읽습니다. 이 페이지 조회는 시트를 수정하지 않습니다. 필터·배지 선택·포커스/탭 복귀에는 추가 조회하지 않습니다. 로그인은 별도 POST 한 번이며 응답을 착지 화면에서 재사용합니다. 같은 경로의 진행 중 요청은 합치지만 다음 방문까지 응답을 캐시하지 않습니다.
 
-PPT의 배지 기준은 잠정 기준입니다. 전문가 배지 3종은 마스터 조건 충족이며 실제 마스터 발급은 H열의 상태로 따로 관리합니다. 공식 신청·심사·발급 기능은 없습니다.
+배지소개 탭의 설명·취득기준·준비안내·추천우선순위·기준상태·표시순서·배지명은 다음 페이지 조회 때 반영됩니다. 입력한 줄바꿈은 보존합니다. 세션은 최대 4시간이며 만료와 다른 탭의 로그아웃은 로컬에서 반영합니다. 계정 중지는 다음 서버 인증 요청 때 반영됩니다.
 
-## 테스트 계정
+마스터를 제외한 6개 배지에 웹앱에서 파일을 한 개씩 제출할 수 있습니다. 이미 획득한 배지는 새 업로드를 시작할 수 없습니다. HWPX·HWP·PDF·PNG·JPEG, 최대 **20 MiB**이며 파일명·확장자·시작 바이트와 HWPX 구조를 검사합니다. `professional_AI 교육 수업 전문가_취득 인증서류.hwpx` 양식을 제공하며 다른 5종은 준비 중입니다. 양식이 없어도 취득기준에 맞는 증빙은 제출할 수 있습니다. 양식은 서류양식 폴더에서 `badge_id_` 접두어로 연결하므로 같은 접두어의 파일을 중복 배치하지 않습니다.
 
-초기 seed는 합성 계정 4개만 생성합니다. 기본 샘플 나이스번호 `0000000001` / 이름 `테스트교원01`은 배지 3개(전문가 2개), 02는 0개, 03은 마스터 조건 충족·발급 전, 04는 전체 획득입니다. 실제 운영 시트의 로그인 값이 변경되었다면 교원 탭의 현재 값을 사용하며 seed로 덮어쓰지 않습니다.
+업로드는 `submission-start` → `submission-chunk` → `submission-complete` API를 사용하며 페이지 조회와 별개입니다. 1 MiB 청크를 Drive resumable upload로 전송하고 서버가 업로드 상태를 Script Properties에 24시간 보관합니다. 같은 업로드 ID·offset의 재전송과 완료 재요청은 중복 처리하지 않으며, Drive가 받은 바이트를 조회해 응답 유실을 조정합니다. 브라우저는 제출 완료까지 화면을 유지해야 합니다. 화면을 닫은 뒤 다시 제출하면 새 업로드이며 이전 파일을 덮어쓰지 않습니다.
 
-현재 계정으로 실제 연결을 검사하려면 Git 추적 제외 파일에 `[{"neisNumber":"...","name":"...","earnedCount":3,"expertCount":2}, ...]` 형식의 계정 2개 이상을 준비하고 `VERIFY_ACCOUNTS_FILE` 환경변수를 해당 경로로 설정합니다. `scripts/verify-live.mjs`는 지정 계정들을 검사하며, `npx playwright test tests/e2e/sheet-collections.spec.ts`는 현재 계정 2개로 PC·모바일 흐름을 확인합니다. `TEST_BASE_URL`로 운영 URL을 지정할 수 있습니다. 계정 파일은 저장소나 배포 파일에 넣지 않습니다.
+완료 시 파일 크기·형식·부모 폴더·권한을 확인한 후에만 `서류제출 내역`에 `submission_id`, `teacher_id`, `badge_id`, `제출일시`, `파일명`, `Drive파일ID`를 기록하고 수집현황을 `서류제출`로 바꿉니다. 로그와 상태는 같은 Sheets batchUpdate로 반영합니다. 업로드 실패·미완료는 수집현황을 바꾸지 않으며, 그사이 관리자가 설정한 `획득`과 취득일을 보존합니다. 완료 응답의 개인 현황을 화면에 적용하므로 추가 페이지 조회는 없습니다.
 
-## GAS와 서버 설정
+관리자는 제출 로그의 파일을 Drive에서 검토한 뒤 수집현황을 직접 `획득`으로 변경하고 필요한 취득일을 입력합니다. 추가 증빙을 재제출해도 이전 제출 파일과 로그는 보존합니다. 자동 심사·승인·발급과 마스터 서류 제출은 제공하지 않습니다.
 
-GAS 프로젝트의 Script Properties에 `SPREADSHEET_ID`, `API_SHARED_SECRET`을 설정합니다. 웹앱은 배포자 권한·익명 접근으로 실행하되 GAS의 공유 비밀값 검증을 통과해야 데이터에 접근합니다. 공개 웹 화면에는 GAS 주소와 비밀값을 넣지 않습니다. GAS 기본 SpreadsheetApp.openById가 편집 권한을 요구하므로, 시트 편집 권한을 추가하지 않고 UrlFetchApp과 Sheets REST API로 읽습니다. 스크립트 권한은 스프레드시트 읽기와 외부 서비스 연결입니다.
+## Drive와 서버 설정
 
-Netlify Functions 환경에 `GAS_WEB_APP_URL`, `GAS_SHARED_SECRET`을 설정합니다. 로컬에서는 `.env.example`을 `.env`로 복사하고 값을 입력합니다. 비밀값·clasp 인증 파일·세션은 Git에 포함하지 않습니다. 서버 환경변수 변경 후에는 Netlify를 다시 배포합니다.
+GAS Script Properties에 `SPREADSHEET_ID`, `API_SHARED_SECRET`을 설정합니다. `SUBMISSION_FOLDER_ID`와 `FORMS_FOLDER_ID`로 폴더를 지정할 수 있으며 현재 코드의 기본값은 아래와 같습니다.
 
-GAS 소스 변경은 `npx clasp push`, 버전 및 웹앱 갱신은 `npx clasp deploy --deploymentId <기존 배포 ID>`로 수행합니다. 실행 계정의 시트 읽기 권한 동의가 필요합니다. 토큰은 4시간 동안 유효하며 서버 캐시에서 제거되면 다시 로그인해야 합니다. 개인 조회에는 서버가 정한 만료 시각을 포함합니다. 열린 화면도 그 시각에 개인 데이터를 지우고, 탭으로 돌아오면 로컬 만료 시각만 확인하고, 서버 조회는 페이지 이동 시 수행합니다. 쿠키가 없어진 경우에도 로그아웃할 수 있습니다.
+| 용도 | 기본 폴더 ID |
+| --- | --- |
+| 인증서류 DB | `1HlRDMBP9-g1Ay5RZpXmmg31sHPm1PL0S` |
+| 서류양식 | `1QHYSQBQVq4Tafl6NYTKSUzlTxj9dL2hM` |
 
-## 실행과 확인
+증빙은 `인증서류 DB / teacher_id_이름_연수원아이디 / 배지명 6개`에 저장합니다. 폴더는 appProperties의 teacherId·badgeId로 재사용합니다. 교원 폴더는 `inheritedPermissionsDisabled=true`인 제한된 액세스를 확인하며, 증빙의 공개·도메인 공유나 잘못된 폴더 계층이 있으면 제출을 막습니다. 기존 교원 폴더의 직접 관리자 권한은 보존합니다. 상위 폴더 편집자에게 증빙 접근 권한을 자동으로 추가하지 않으므로 실제 검토 담당자의 교원 폴더 직접 공유를 확인합니다.
 
-운영 웹앱: https://jne-digital-teacher.netlify.app
+GAS는 배포자 권한·익명 접근으로 실행하지만 모든 요청에 공유 비밀값을 검증합니다. `admin-provision`은 이 공유키를 가진 운영 도구에서 GAS로 직접 호출하는 폴더·로그 탭 준비 작업입니다. 공개 Netlify API에는 노출하지 않습니다. 교원 제출은 HttpOnly 세션으로 범위를 정하고 임의의 파일·폴더 ID를 받지 않습니다. Drive OAuth 토큰과 resumable URI는 브라우저에 보내지 않습니다.
 
-GitHub: https://github.com/gud8238/jne-digital-teacher (`main`)
+GAS 권한은 `spreadsheets`, `drive`, `script.external_request`입니다. Sheets·Drive API가 사용 가능해야 하며 배포 계정이 추가 권한에 동의해야 합니다. Apps Script 편집기에서 `authorizeDocumentWorkflow`를 실행해 동의와 읽기 접근을 확인할 수 있습니다. 이 함수는 폴더 생성이나 시트 수정을 하지 않습니다.
 
-Netlify 프로젝트 ID: `84d03263-0534-441b-aee4-50d065e6d371`. 이 폴더에서 `netlify deploy --build --prod`로 배포합니다. 현재는 CLI 배포 방식이며, GitHub push만으로 자동 배포하지 않습니다.
+Netlify Functions 환경에 `GAS_WEB_APP_URL`, `GAS_SHARED_SECRET`을 설정합니다. 로컬은 `.env.example`을 `.env`로 복사해 설정합니다. 서버 환경변수 변경 후에는 Netlify를 다시 배포합니다. 비밀값·clasp 인증 파일·계정 파일·백업·세션은 Git과 배포 파일에 넣지 않습니다.
 
-GAS 프로젝트: https://script.google.com/home/projects/1U10P6gNLioQQaC8jnlzTIHxCoi8T4g8kp_SNdU5xdaobQy3cTmwISOov/edit
+## 배포와 확인
 
-기존 웹앱 배포 ID: `AKfycbyMhrukubhvwY67SFv4WgHfdaM_ak13p8xUA3w46PYh6CiytIyID8SsLGdS9IsaioVK`. 가로형 DB 전환은 GAS 6이며, 페이지별 POST 통합 조회를 추가한 현재 GAS 버전은 7입니다.
+[운영 웹앱](https://jne-digital-teacher.netlify.app) · [GitHub](https://github.com/gud8238/jne-digital-teacher) · [GAS 프로젝트](https://script.google.com/home/projects/1U10P6gNLioQQaC8jnlzTIHxCoi8T4g8kp_SNdU5xdaobQy3cTmwISOov/edit)
 
-의존성은 `npm ci`, 단위·컴포넌트 검증은 `npm test`, 타입 검사는 `npm run typecheck`, 린트는 `npm run lint`, 제품 빌드는 `npm run build`입니다. API를 포함한 로컬 실행은 `netlify dev`입니다. 실제 연결 없이 `npm run dev`만 실행하면 로그인 API를 사용할 수 없습니다.
+기존 GAS 웹앱 배포 ID는 `AKfycbyMhrukubhvwY67SFv4WgHfdaM_ak13p8xUA3w46PYh6CiytIyID8SsLGdS9IsaioVK`입니다. 2026-11-10 서류 제출 대응 GAS는 버전 8로 이 배포에 반영했습니다. 이후 변경도 `npx clasp push` 후 `npx clasp deploy --deploymentId <기존 배포 ID>`로 기존 배포를 갱신하고 실제 버전을 기록합니다. 제출 상태를 읽을 수 있는 GAS를 먼저 반영하고 권한 동의를 완료한 뒤 프런트엔드를 배포합니다.
 
-프런트엔드의 기본 실행에는 가짜 사용자나 정적 API 대체가 없습니다. 연결 실패 시 화면에서 다시 시도하거나 환경설정을 확인합니다.
+Netlify 프로젝트 ID는 `84d03263-0534-441b-aee4-50d065e6d371`입니다. 이 폴더에서 `netlify deploy --build --prod`로 배포하며 GitHub push만으로 자동 배포하지 않습니다.
 
-인증 실패한 이전 GET 응답은 새 로그인 쿠키를 지우지 않습니다. 개인 화면 상태는 인증 실패 즉시 지웁니다. 명시적 로그아웃은 서버 세션과 브라우저 쿠키를 삭제합니다.
+Node 24에서 `npm ci` 후 `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`를 실행합니다. API를 포함한 로컬 실행은 `netlify dev`이며 `npm run dev`만으로 로그인 API는 제공되지 않습니다. 브라우저 검증은 `npm run test:e2e`입니다.
+
+실제 연결 검증용 계정은 Git 추적 제외 JSON 파일에 `[{"trainingId":"...","name":"...","earnedCount":3,"expertCount":2}, ...]` 형식으로 2개 이상 준비하고 `VERIFY_ACCOUNTS_FILE` 환경변수로 경로를 지정합니다. GAS 검증은 `node --env-file=.env scripts/verify-live.mjs --gas`, 로컬 API 검증은 `node scripts/verify-live.mjs http://localhost:8888`입니다. 브라우저의 계정별 PC·모바일 검증은 `npx playwright test tests/e2e/sheet-collections.spec.ts`이며 `TEST_BASE_URL`로 대상 URL을 지정할 수 있습니다. 실제 계정 파일은 저장소나 배포 파일에 넣지 않습니다.
+
+제출 검증은 현재 시트의 서로 다른 계정으로 로그인 격리, PC·모바일 제출, 허용 형식·크기, 실패 시 상태 유지, 완료 로그·Drive 파일, 관리자 획득 보존을 확인합니다. 실제 제출은 Drive 파일과 시트 로그를 생성하므로 운영자가 지정한 계정·배지로 수행합니다.
