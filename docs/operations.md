@@ -61,7 +61,7 @@ Netlify Functions 환경에 `GAS_WEB_APP_URL`, `GAS_SHARED_SECRET`을 설정합�
 
 [운영 웹앱](https://jne-digital-teacher.netlify.app) · [GitHub](https://github.com/gud8238/jne-digital-teacher) · [GAS 프로젝트](https://script.google.com/home/projects/1U10P6gNLioQQaC8jnlzTIHxCoi8T4g8kp_SNdU5xdaobQy3cTmwISOov/edit)
 
-기존 GAS 웹앱 배포 ID는 `AKfycbyMhrukubhvwY67SFv4WgHfdaM_ak13p8xUA3w46PYh6CiytIyID8SsLGdS9IsaioVK`입니다. 2026-11-10 서류 제출 대응 GAS는 버전 8로 이 배포에 반영했습니다. 이후 변경도 `npx clasp push` 후 `npx clasp deploy --deploymentId <기존 배포 ID>`로 기존 배포를 갱신하고 실제 버전을 기록합니다. 제출 상태를 읽을 수 있는 GAS를 먼저 반영하고 권한 동의를 완료한 뒤 프런트엔드를 배포합니다.
+기존 GAS 웹앱 배포 ID는 `AKfycbyMhrukubhvwY67SFv4WgHfdaM_ak13p8xUA3w46PYh6CiytIyID8SsLGdS9IsaioVK`입니다. 서류 제출 기능은 버전 8에 반영했고, 2026-11-10 양식 이름 변경 대응까지 반영한 현재 버전은 9입니다. 이후 변경도 `npx clasp push --force` 후 `npx clasp deploy --deploymentId <기존 배포 ID>`로 기존 배포를 갱신하고 실제 버전을 기록합니다. 제출 상태를 읽을 수 있는 GAS를 먼저 반영하고 권한 동의를 완료한 뒤 프런트엔드를 배포합니다.
 
 Netlify 프로젝트 ID는 `84d03263-0534-441b-aee4-50d065e6d371`입니다. 이 폴더에서 `netlify deploy --build --prod`로 배포하며 GitHub push만으로 자동 배포하지 않습니다.
 
