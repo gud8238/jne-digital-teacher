@@ -120,7 +120,7 @@ export default function SubmissionPanel({
             }}
           />
           <small id={`submission-help-${badge.id}`}>
-            HWPX · HWP · PDF · PNG · JPEG / 파일 1개, 최대 20 MiB
+            HWPX · HWP · PDF · PNG · JPEG / 파일 1개, 최대 20Mb
           </small>
           {file ? <p className="submission-filename">{file.name}</p> : null}
           {busy ? (

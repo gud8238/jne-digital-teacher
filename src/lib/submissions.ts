@@ -3,27 +3,13 @@ import type { BadgeId, Me } from "../domain/badges";
 
 export const submissionAccept = ".hwpx,.hwp,.pdf,.png,.jpg,.jpeg";
 const maxSize = 20 * 1024 * 1024;
-const allowedMimeTypes = new Set([
-  "",
-  "application/octet-stream",
-  "application/hwp+zip",
-  "application/vnd.hancom.hwpx",
-  "application/x-hwpx",
-  "application/x-hwp",
-  "application/haansofthwp",
-  "application/vnd.hancom.hwp",
-  "application/pdf",
-  "image/png",
-  "image/jpeg",
-]);
 export function validateSubmissionFile(file: File): string {
-  if (
-    !/\.(hwpx|hwp|pdf|png|jpe?g)$/i.test(file.name) ||
-    !allowedMimeTypes.has(file.type.toLowerCase())
-  )
+  // Browser MIME labels depend on OS file associations. The server derives the
+  // MIME from the supported extension and GAS verifies the actual document.
+  if (!/\.(hwpx|hwp|pdf|png|jpe?g)$/i.test(file.name))
     return "HWPX, HWP, PDF, PNG, JPEG 파일만 제출할 수 있습니다.";
   if (!file.size) return "내용이 있는 파일을 선택해 주세요.";
-  if (file.size > maxSize) return "파일은 최대 20 MiB까지 제출할 수 있습니다.";
+  if (file.size > maxSize) return "파일은 최대 20Mb까지 제출할 수 있습니다.";
   return "";
 }
 function base64(blob: Blob): Promise<string> {

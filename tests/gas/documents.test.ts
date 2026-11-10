@@ -139,6 +139,33 @@ it("uploads privately, hides Drive session details and changes status only after
   expect(r.complete(start.data.uploadId).ok).toBe(true);
   expect(r.audit).toHaveLength(1);
 });
+it.each([
+  "beginner",
+  "edtech",
+  "professional",
+  "research",
+  "lecturer",
+  "coaching",
+])("%s 증빙 제출은 선택한 배지만 심사 대기로 변경한다", (badgeId) => {
+  const r = setup();
+  r.tables["배지별 수집현황"].forEach((row) => {
+    row.수집현황 = "미획득";
+    row.취득일 = "";
+  });
+  const started = r.start({ badgeId });
+  expect(started.ok).toBe(true);
+  expect(r.chunk(started.data.uploadId).ok).toBe(true);
+  const result = r.complete(started.data.uploadId);
+  expect(result.ok).toBe(true);
+  expect(result.data.submission.badgeId).toBe(badgeId);
+  expect(
+    result.data.me.collections
+      .filter((c: any) => c.status === "서류제출")
+      .map((c: any) => c.badgeId),
+  ).toEqual([badgeId]);
+  expect(r.audit).toHaveLength(1);
+  expect(r.audit[0].badgeId).toBe(badgeId);
+});
 it("rejects foreign owners, malformed base64, wrong offsets and invalid file signatures without changing state", () => {
   const r = setup(),
     id = r.start().data.uploadId;

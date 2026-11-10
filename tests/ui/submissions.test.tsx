@@ -79,7 +79,7 @@ it("허용하지 않는 파일과 20 MiB 초과 파일은 전송하지 않고 �
       type: "application/pdf",
     }),
   );
-  expect(await screen.findByRole("alert")).toHaveTextContent("20 MiB");
+  expect(await screen.findByRole("alert")).toHaveTextContent("20Mb");
 });
 it("파일을 청크로 전송하고 완료 응답으로 심사 대기를 표시하며 페이지를 다시 조회하지 않는다", async () => {
   const calls: string[] = [],
