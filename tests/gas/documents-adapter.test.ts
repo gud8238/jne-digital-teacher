@@ -42,6 +42,80 @@ function adapter() {
   };
 }
 
+const formNames = [
+  ["beginner", "AI 교육 입문자"],
+  ["edtech", "AI 교육 활용 전문가"],
+  ["professional", "AI 교육 수업 전문가"],
+  ["research", "AI 교육 연구 실천가"],
+  ["lecturer", "AI 교육 강의 전문가"],
+  ["coaching", "AI 교육 코칭 전문가"],
+];
+it("recognizes all six Korean filenames after the English prefixes are removed", () => {
+  const r = adapter();
+  r.respond(() => ({
+    status: 200,
+    body: {
+      files: formNames.map(([id, name]) => ({
+        id: "new-" + id,
+        name: name + "_취득 인증서류.hwpx",
+      })),
+    },
+  }));
+  expect(
+    Array.from(r.service.templates(), (f: any) => [f.badgeId, f.id]),
+  ).toEqual(formNames.map(([id]) => [id, "new-" + id]));
+});
+it("keeps the observed Drive file ID connected when its display name changes again", () => {
+  const r = adapter();
+  r.respond(() => ({
+    status: 200,
+    body: {
+      files: [
+        {
+          id: "1oDsHIcXTBPTOYXdj68YWdNIUzZt0ZCHX",
+          name: "입문자 신청서 최신본.hwpx",
+        },
+        { id: "unregistered-copy", name: "AI 교육 입문자_취득 인증서류.hwpx" },
+      ],
+    },
+  }));
+  expect(
+    Array.from(r.service.templates(), (f: any) => [f.badgeId, f.id, f.name]),
+  ).toEqual([
+    [
+      "beginner",
+      "1oDsHIcXTBPTOYXdj68YWdNIUzZt0ZCHX",
+      "입문자 신청서 최신본.hwpx",
+    ],
+  ]);
+});
+it("keeps legacy names compatible and refuses ambiguous replacement templates", () => {
+  const r = adapter();
+  let files = [{ id: "legacy", name: "professional_legacy.hwpx" }];
+  r.respond(() => ({ status: 200, body: { files } }));
+  expect(r.service.templates()[0].badgeId).toBe("professional");
+  files = [
+    { id: "copy1", name: "AI 교육 수업 전문가_취득 인증서류.hwpx" },
+    { id: "copy2", name: "professional_copy.hwpx" },
+  ];
+  expect(() => r.service.templates()).toThrow();
+});
+it("uses only HWPX files returned from the configured forms folder and excludes master", () => {
+  const r = adapter();
+  let files: { id: string; name: string }[] = [];
+  r.respond(() => ({ status: 200, body: { files } }));
+  expect(r.service.templates()).toHaveLength(0);
+  files = [
+    { id: "1oDsHIcXTBPTOYXdj68YWdNIUzZt0ZCHX", name: "not-a-form.pdf" },
+    { id: "master", name: "master_form.hwpx" },
+    { id: "unrelated", name: "기타 문서.hwpx" },
+  ];
+  expect(r.service.templates()).toHaveLength(0);
+  const query = new URL(r.calls[0].url).searchParams.get("q")!;
+  expect(query).toContain("'1QHYSQBQVq4Tafl6NYTKSUzlTxj9dL2hM' in parents");
+  expect(query).toContain("trashed=false");
+});
+
 it("keeps 308 Range visible and reconciles lost chunk responses before sending more bytes", () => {
   const r = adapter();
   r.respond((_url, options) =>

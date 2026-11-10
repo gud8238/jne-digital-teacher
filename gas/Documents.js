@@ -1,6 +1,16 @@
 // All Drive IDs and resumable URIs stay server-side. No permission is made public.
 var DOCUMENT_CHUNK_SIZE = 1048576;
 var DOCUMENT_MAX_SIZE = 20 * 1048576;
+// Current blank forms stay connected when their Drive display names change.
+// These IDs are only used when the file is still inside the forms folder.
+var DOCUMENT_TEMPLATE_FILE_IDS = {
+  beginner: "1oDsHIcXTBPTOYXdj68YWdNIUzZt0ZCHX",
+  edtech: "1TCetoU-oL_w1rbOOPcGGcmCAhQpdkoYH",
+  professional: "1wAztLSMigqE5oX4r7AybCMCo6ucJTmka",
+  research: "1fmO6lYk2DxTqYrkSlQc2vuEYQxLtwL0B",
+  lecturer: "1KkT3XP1qPOVZnWthlXKdZ-7zDu5Mwx6E",
+  coaching: "1PLaHU3s7G5CplnpTQkeOH6AFZyKcQryy",
+};
 var DOCUMENT_AUDIT_HEADERS = [
   "submission_id",
   "teacher_id",
@@ -702,8 +712,19 @@ function documentServices(properties) {
         return id !== "master";
       }).forEach(function (id) {
         var matches = files.filter(function (f) {
-          return f.name.indexOf(id + "_") === 0;
+          return (
+            /\.hwpx$/i.test(f.name) && f.id === DOCUMENT_TEMPLATE_FILE_IDS[id]
+          );
         });
+        if (matches.length === 0)
+          matches = files.filter(function (f) {
+            return (
+              /\.hwpx$/i.test(f.name) &&
+              (f.name.indexOf(id + "_") === 0 ||
+                f.name.replace(/\.hwpx$/i, "") ===
+                  COLLECTION_ALIASES[id] + "_취득 인증서류")
+            );
+          });
         if (matches.length > 1) apiFailure("DATA_ERROR");
         if (matches.length === 1)
           templates.push(Object.assign({ badgeId: id }, matches[0]));
